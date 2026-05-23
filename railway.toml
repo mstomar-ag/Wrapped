@@ -1,0 +1,15 @@
+# Railway config-as-code for Wrapped.
+# https://docs.railway.com/config-as-code
+#
+# After linking: mount a volume at /app/data in the Railway dashboard (or `make railway-volume`).
+# Set env vars from docs/railway.md — do not commit secrets.
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+healthcheckPath = "/api/health"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
+numReplicas = 1

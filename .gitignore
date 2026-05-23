@@ -1,0 +1,15 @@
+# Local Railway project link (run make railway-init / railway-link)
+.railway/
+
+node_modules
+out
+.remotion-bundle
+.env
+.env.local
+*.log
+web/dist
+data/tokens.json
+data/archive.json
+data/schedule.json
+
+wrapped-google-internal-signin.json

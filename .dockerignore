@@ -1,0 +1,9 @@
+node_modules
+out
+.remotion-bundle
+.env
+.env.local
+data/members.json
+.git
+.claude
+*.log

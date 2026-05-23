@@ -1,0 +1,92 @@
+[
+  {
+    "id": "mayank",
+    "name": "Mayank Singh Tomar",
+    "role": "Engineer",
+    "socials": {
+      "slack": { "userId": "U0A384S7PQQ", "handle": "mayank.tomar" },
+      "github": { "username": "mstomar-ag" },
+      "linkedin": { "handle": "mayank_tom28235" },
+      "x": { "handle": "mayank_tom28235" },
+      "email": "mayank.tomar@agrim.ai"
+    }
+  },
+  {
+    "id": "girijesh",
+    "name": "Girijesh Jha",
+    "role": "Owner",
+    "socials": {
+      "slack": { "userId": "U083QK56XRD", "handle": "girijesh" },
+      "email": "girijesh@agrim.ai",
+      "github": { "username": "girijesh-agrim" }
+    }
+  },
+  {
+    "id": "swapnil",
+    "name": "Swapnil Dubey",
+    "role": "Tech Lead",
+    "socials": {
+      "slack": { "userId": "U08QK32KXNF", "handle": "swapnil" },
+      "email": "swapnil@agrim.ai",
+      "github": { "username": "swapnil-agrim" }
+    }
+  },
+  {
+    "id": "chetan-gupta",
+    "name": "Chetan Gupta",
+    "role": "Engineer",
+    "socials": {
+      "slack": { "userId": "U0933TML9B2", "handle": "chetan.gupta" },
+      "email": "chetan.gupta@agrim.ai",
+      "github": { "username": "CGupta-agrim" }
+    }
+  },
+  {
+    "id": "anshuman",
+    "name": "Anshuman Kansana",
+    "role": "Engineer",
+    "socials": {
+      "slack": { "userId": "U09MZHZAD0U", "handle": "anshuman" },
+      "email": "anshuman@agrim.ai",
+      "github": { "username": "Anshuman-Agrim" }
+    }
+  },
+  {
+    "id": "girish",
+    "name": "Girish Jethani",
+    "role": "Marketing",
+    "socials": {
+      "slack": { "userId": "U09PG4WRUR2", "handle": "girish" },
+      "email": "girish@agrim.ai"
+    }
+  },
+  {
+    "id": "rayyaan",
+    "name": "Rayyaan Ahmed",
+    "role": "Engineer",
+    "socials": {
+      "slack": { "userId": "U0A3E9MD72T", "handle": "rayyaan" },
+      "email": "rayyaan@agrim.ai",
+      "github": { "username": "rayyan-agrim" }
+    }
+  },
+  {
+    "id": "dev-bhanushali",
+    "name": "Dev Bhanushali",
+    "role": "Engineer",
+    "socials": {
+      "slack": { "userId": "U0A9XC27L5S", "handle": "dev.bhanushali" },
+      "email": "dev.bhanushali@agrim.ai",
+      "github": { "username": "devb3" }
+    }
+  },
+  {
+    "id": "abhilash",
+    "name": "Abhilash Tom",
+    "role": "Marketing",
+    "socials": {
+      "slack": { "userId": "U0B4JSQTDE3", "handle": "abhilash" },
+      "email": "abhilash@agrim.ai"
+    }
+  }
+]
