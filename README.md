@@ -1,4 +1,4 @@
-# Wrapped
+# Wrapped.
 
 > Wrapped for your week at work. Triggered in Slack. Shared as a 25-second reel.
 
