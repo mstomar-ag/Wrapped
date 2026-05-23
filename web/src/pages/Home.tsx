@@ -2,20 +2,33 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api, ArchiveEntry, Member } from "../api";
 import { StatusBadge } from "../components/StatusBadge";
+import { fmtDateTime, fmtRange } from "../format";
+
+const dedupeRecent = (entries: ArchiveEntry[]): ArchiveEntry[] => {
+  const out: ArchiveEntry[] = [];
+  const keys = new Set<string>();
+  for (const e of entries) {
+    const key = `${e.kind}|${e.subject}|${e.windowFrom}|${e.windowTo}`;
+    if (keys.has(key)) continue;
+    keys.add(key);
+    out.push(e);
+  }
+  return out;
+};
 
 export const Home: React.FC = () => {
   const [recent, setRecent] = useState<ArchiveEntry[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
 
   useEffect(() => {
-    api.listArchive({ limit: 8 }).then((r) => setRecent(r.entries));
+    api.listArchive({ limit: 20 }).then((r) => setRecent(dedupeRecent(r.entries).slice(0, 8)));
     api.listMembers().then((r) => setMembers(r.members));
   }, []);
 
   return (
     <>
       <h1>Wrapped</h1>
-      <p className="muted">A weekly highlight reel of your team's work, on demand.</p>
+      <p className="muted">A weekly highlight reel of your team&apos;s work, on demand.</p>
 
       <div className="row" style={{ marginBottom: 32 }}>
         <Link to="/generate"><button>Generate a wrap</button></Link>
@@ -36,10 +49,15 @@ export const Home: React.FC = () => {
                   <StatusBadge status={e.status} />
                 </div>
                 <div className="muted" style={{ fontSize: 13 }}>
-                  {new Date(e.windowFrom).toLocaleDateString()} → {new Date(e.windowTo).toLocaleDateString()}
+                  {e.windowLabel ?? fmtRange(e.windowFrom, e.windowTo)}
                 </div>
+                {e.status === "ready" && e.hasVideo === false && (
+                  <div style={{ fontSize: 12, marginTop: 8, color: "var(--accent)" }}>
+                    Video missing — regenerate
+                  </div>
+                )}
                 <div className="muted" style={{ fontSize: 12, marginTop: 8 }}>
-                  {new Date(e.createdAt).toLocaleString()}
+                  {fmtDateTime(e.createdAt)} IST
                 </div>
               </div>
             </Link>

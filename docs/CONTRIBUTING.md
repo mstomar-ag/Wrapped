@@ -24,7 +24,7 @@ CI runs the same. PRs with failing checks won't merge.
 
 - **TypeScript everywhere.** No `any` (the lint rule is "warn"; fix before merging).
 - **Imports relative within a module, alias-free.** This is a small repo.
-- **No comments that restate code.** Use a comment only when the *why* is non-obvious (a constraint, a surprising edge case, a workaround).
+- **No comments that restate code.** Use a comment only when the _why_ is non-obvious (a constraint, a surprising edge case, a workaround).
 - **Files stay under ~150 lines** unless there's a clear reason. Long files mean a missing module boundary.
 - **Functions over classes** unless state is genuinely required.
 - **No premature abstraction.** Three similar lines is fine. Wait for the fourth before extracting.
@@ -32,14 +32,18 @@ CI runs the same. PRs with failing checks won't merge.
 ## Adding code
 
 ### A new data source
+
 Walk through `server/collectors/` and copy `github.ts` as a template:
+
 1. New file `server/collectors/<name>.ts` exports `collect<Name>(member, win): Promise<<Name>Signals | null>`.
 2. Add `<Name>Signals` to `server/collectors/types.ts`.
 3. Wire into `server/aggregator.ts`: extend `collectAll`, then optionally surface fields in `buildWrappedData`.
 4. Add a test that the collector returns `null` when the relevant env var is absent.
 
 ### A new slide type
+
 Walk through `src/scenes/`. Copy `NumbersScene.tsx` as a template:
+
 1. New file `src/scenes/<Name>Scene.tsx` using `SceneBG` + animation helpers from `src/components/anim.ts`.
 2. Pick or add a palette in `src/theme.ts`.
 3. Register in `src/Wrapped.tsx`'s `SCENES` array with a duration in frames (multiple of 15 keeps the cadence musical).
@@ -47,13 +51,16 @@ Walk through `src/scenes/`. Copy `NumbersScene.tsx` as a template:
 5. See `.claude/skills/design-reel-scene/SKILL.md` for the design playbook.
 
 ### A new music track
+
 Use the workflow in `.claude/skills/find-cc0-music/SKILL.md`. The short version:
+
 1. Pull a CC0 track from a verified source (the SoundSafari archive is the default).
 2. Drop it at `public/music/<NN>-<slug>.mp3`.
 3. Add the path to `TRACKS` in `src/music.ts`.
 4. Add a test in `src/music.test.ts` covering the new track's inclusion.
 
 ### A new window keyword
+
 Edit `server/window.ts` and `server/window.test.ts`. Don't forget to update the slash-command "Usage Hint" in Slack.
 
 ## Reviewer checklist
@@ -69,7 +76,7 @@ When reviewing a PR, ask:
 
 ## Commit messages
 
-Conventional-style is welcome but not enforced. The important thing is the *why* in the body, since the code shows the *what*.
+Conventional-style is welcome but not enforced. The important thing is the _why_ in the body, since the code shows the _what_.
 
 ```
 feat(collectors): add Linear ticket signals

@@ -12,5 +12,4 @@ export const PALETTES = {
 
 export type Palette = (typeof PALETTES)[keyof typeof PALETTES];
 
-export const FONT_STACK =
-  '"Inter", "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif';
+export const FONT_STACK = '"Inter", "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif';

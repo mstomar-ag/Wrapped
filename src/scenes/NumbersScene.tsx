@@ -31,9 +31,31 @@ export const NumbersScene: React.FC<{ data: WrappedData }> = ({ data }) => {
           BY THE NUMBERS
         </div>
 
-        <Row label="messages sent" value={messages.toLocaleString()} color={p.fg} delay={6} fps={fps} frame={frame} />
-        <Row label="commits pushed" value={commits.toLocaleString()} color={p.accent} delay={18} fps={fps} frame={frame} />
-        <Row label="lines changed" value={lines.toLocaleString()} color={p.fg} delay={32} fps={fps} frame={frame} small />
+        <Row
+          label="messages sent"
+          value={messages.toLocaleString()}
+          color={p.fg}
+          delay={6}
+          fps={fps}
+          frame={frame}
+        />
+        <Row
+          label="commits pushed"
+          value={commits.toLocaleString()}
+          color={p.accent}
+          delay={18}
+          fps={fps}
+          frame={frame}
+        />
+        <Row
+          label="lines changed"
+          value={lines.toLocaleString()}
+          color={p.fg}
+          delay={32}
+          fps={fps}
+          frame={frame}
+          small
+        />
       </AbsoluteFill>
     </SceneBG>
   );

@@ -2,10 +2,10 @@
 
 Production runs on [Railway](https://railway.com) in the **Girijesh-agrim** workspace (project **`wrpd`**). Wrapped uses **no database** — persistence is two filesystem volumes:
 
-| Mount | Contents |
-|-------|----------|
+| Mount           | Contents                                              |
+| --------------- | ----------------------------------------------------- |
 | **`/app/data`** | `members.json`, archive index, schedule, OAuth tokens |
-| **`/app/out`** | Rendered MP4s (`out/cache/`, archive video files) |
+| **`/app/out`**  | Rendered MP4s (`out/cache/`, archive video files)     |
 
 Neither your local **`.env`** nor **`data/members.json`** is baked into the Docker image (see `.dockerignore`). You configure secrets in Railway and seed data on the volume after deploy.
 
@@ -19,14 +19,14 @@ Neither your local **`.env`** nor **`data/members.json`** is baked into the Dock
 
 `make railway-deploy` runs `railway up` and ships **code + Docker image only**. It does **not** upload your laptop’s `.env`, `members.json`, or MP4s.
 
-| Item | In `railway up`? | Where it lives in prod |
-|------|------------------|-------------------------|
-| App code, Chromium, `web/dist` | Yes (Docker build) | Container image |
-| `.env` / secrets | **No** | Railway **Variables** |
-| `data/members.json` | **No** | Volume **`/app/data`** (you seed) |
-| Archive / schedule JSON | **No** | Volume **`/app/data`** (app creates if missing) |
-| Rendered videos | **No** | Volume **`/app/out`** |
-| Volumes themselves | **No** | `make railway-volume` or dashboard |
+| Item                           | In `railway up`?   | Where it lives in prod                          |
+| ------------------------------ | ------------------ | ----------------------------------------------- |
+| App code, Chromium, `web/dist` | Yes (Docker build) | Container image                                 |
+| `.env` / secrets               | **No**             | Railway **Variables**                           |
+| `data/members.json`            | **No**             | Volume **`/app/data`** (you seed)               |
+| Archive / schedule JSON        | **No**             | Volume **`/app/data`** (app creates if missing) |
+| Rendered videos                | **No**             | Volume **`/app/out`**                           |
+| Volumes themselves             | **No**             | `make railway-volume` or dashboard              |
 
 Do **not** set Railway’s start command to `npm run server`. The image runs `npx tsx server/index.ts` (see `Dockerfile` + `railway.toml`).
 
@@ -91,10 +91,10 @@ Run **after** the service exists:
 make railway-volume
 ```
 
-| Mount path | Purpose |
-|------------|---------|
-| **`/app/data`** | **Required** — member registry, archive metadata, schedule |
-| **`/app/out`** | **Strongly recommended** — MP4 files; without it, redeploys wipe videos |
+| Mount path      | Purpose                                                                 |
+| --------------- | ----------------------------------------------------------------------- |
+| **`/app/data`** | **Required** — member registry, archive metadata, schedule              |
+| **`/app/out`**  | **Strongly recommended** — MP4 files; without it, redeploys wipe videos |
 
 Confirm in the dashboard: **Service → Settings → Volumes** — both paths listed. Redeploy or restart after adding volumes.
 
@@ -117,15 +117,15 @@ railway variables set PUBLIC_BASE_URL=https://your-service.up.railway.app
 
 **Minimum for Slack wraps:**
 
-| Variable | Required |
-|----------|----------|
-| `SLACK_BOT_TOKEN` | Yes |
-| `SLACK_SIGNING_SECRET` | Yes |
-| `GITHUB_TOKEN` | Yes (authorize SSO for your org on the PAT) |
-| `PUBLIC_BASE_URL` | Yes — your Railway HTTPS URL from step 3 |
-| `GEMINI_API_KEY` / `OPENROUTER_API_KEY` / `ANTHROPIC_API_KEY` | Optional (better copy) |
-| `ENCRYPTION_KEY` | Yes if using OAuth self-link |
-| `GITHUB_ORG` | Optional (`Agrim-Intelligence`) |
+| Variable                                                      | Required                                    |
+| ------------------------------------------------------------- | ------------------------------------------- |
+| `SLACK_BOT_TOKEN`                                             | Yes                                         |
+| `SLACK_SIGNING_SECRET`                                        | Yes                                         |
+| `GITHUB_TOKEN`                                                | Yes (authorize SSO for your org on the PAT) |
+| `PUBLIC_BASE_URL`                                             | Yes — your Railway HTTPS URL from step 3    |
+| `GEMINI_API_KEY` / `OPENROUTER_API_KEY` / `ANTHROPIC_API_KEY` | Optional (better copy)                      |
+| `ENCRYPTION_KEY`                                              | Yes if using OAuth self-link                |
+| `GITHUB_ORG`                                                  | Optional (`Agrim-Intelligence`)             |
 
 `PORT` is set by Railway automatically. Full list: `.env.example`.
 
@@ -267,13 +267,13 @@ find /app/out/cache -name '*.mp4' -mtime +30 -delete
 
 ## Costs (rough)
 
-| Item | ~10 wraps/day, always on |
-|------|---------------------------|
-| Railway Hobby | **$5–15/mo** (plan + light usage; $5 credit on Hobby) |
-| Railway Pro (team workspace) | **$20–35/mo** typical |
-| Volumes (few GB) | **&lt; $1/mo** |
-| Slack / GitHub | **$0** |
-| LLM copy (optional) | **~$0.30–3/mo** at this volume |
+| Item                         | ~10 wraps/day, always on                              |
+| ---------------------------- | ----------------------------------------------------- |
+| Railway Hobby                | **$5–15/mo** (plan + light usage; $5 credit on Hobby) |
+| Railway Pro (team workspace) | **$20–35/mo** typical                                 |
+| Volumes (few GB)             | **&lt; $1/mo**                                        |
+| Slack / GitHub               | **$0**                                                |
+| LLM copy (optional)          | **~$0.30–3/mo** at this volume                        |
 
 Set a usage alert in the Railway dashboard after the first week.
 
@@ -281,13 +281,13 @@ Set a usage alert in the Railway dashboard after the first week.
 
 ## Troubleshooting
 
-| Symptom | Fix |
-|---------|-----|
-| CLI `Unauthorized` | `make railway-login` |
-| Unknown member / dummy reel | Seed `members.json` (step 6) |
-| Videos gone after redeploy | Mount **`/app/out`** |
-| GitHub 0 commits | PAT `repo` + org SSO authorization |
-| Remotion OOM / crash | Raise RAM to 1 GB |
-| Slack timeout | Check `SLACK_SIGNING_SECRET` and Request URL |
+| Symptom                     | Fix                                          |
+| --------------------------- | -------------------------------------------- |
+| CLI `Unauthorized`          | `make railway-login`                         |
+| Unknown member / dummy reel | Seed `members.json` (step 6)                 |
+| Videos gone after redeploy  | Mount **`/app/out`**                         |
+| GitHub 0 commits            | PAT `repo` + org SSO authorization           |
+| Remotion OOM / crash        | Raise RAM to 1 GB                            |
+| Slack timeout               | Check `SLACK_SIGNING_SECRET` and Request URL |
 
 More: [railway.md](./railway.md).

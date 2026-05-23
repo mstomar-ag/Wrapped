@@ -40,7 +40,7 @@ out/cache/             Render cache, keyed by content hash
 
 - **TypeScript strict mode**, ESM-only (`"type": "module"`).
 - **No `any`.** Lint rule warns; reject in review.
-- **Comments only when the *why* is non-obvious.** Don't restate code.
+- **Comments only when the _why_ is non-obvious.** Don't restate code.
 - **Files stay short** (≈150 lines). Long files → missing module boundary.
 - **Every collector returns `null` when its credential is absent.** This is the contract — the pipeline must degrade gracefully.
 - **Workspace tokens, never per-user.** LinkedIn and email are the only exceptions and they're optional.
@@ -60,30 +60,39 @@ npm run test:watch        TDD loop
 ## Gotchas and landmines
 
 ### `"type": "module"` is required
+
 Top-level `await` in `server/cli.ts` and ESM imports throughout demand this. Don't switch to CommonJS without rewriting the CLIs.
 
 ### `--legacy-peer-deps` for installs
+
 Some deps (Anthropic SDK in particular) pin Zod versions that conflict with Remotion's. We resolve this with `--legacy-peer-deps`. Keep using it; don't fight peer ranges.
 
 ### Slack must ack within 3 seconds
+
 The `/api/slack/command` handler validates synchronously, then runs collect + render + upload in a fire-and-forget worker. **Don't move the heavy work above the `c.json(...)` ack.** Slack will time out the user-visible response.
 
 ### The Remotion bundle is cached per process
+
 `server/render.ts` calls `bundle()` once and reuses the result via a module-level promise. Don't add `import` calls inside the bundled tree that mutate global state — they only run once.
 
 ### Composition duration is computed from `SCENES` array
+
 In `src/Wrapped.tsx`, `WRAPPED_DURATION` is `SCENES.reduce(...)`. Changing scene durations there automatically updates the registered composition. Don't hardcode the duration anywhere else.
 
 ### Music is keyed by member handle, not random
+
 `pickTrack(member.handle)` is deterministic. Alice's reel always uses the same track. That's intentional — wraps feel like personal artifacts. Don't replace with `Math.random()`.
 
 ### `data/members.json` is real persistence
+
 The Slack auto-discovery flow writes to it. Don't delete it in tests or as cleanup — gate any file writes in tests behind `import.meta.dirname` checks or mock the store.
 
 ### Render cache hashes the WrappedData JSON
+
 Identical inputs → instant return of a cached MP4. If you're hacking on a scene and re-rendering produces no visible change, the cache is hitting; delete `out/cache/*.mp4` or vary the input.
 
 ### Slack scopes matter
+
 Adding a new collector that reads Slack data may need new scopes. Update `docs/SETUP.md`'s scope table and tell the admin to reinstall the app.
 
 ## When extending, do this

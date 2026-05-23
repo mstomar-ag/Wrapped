@@ -18,6 +18,7 @@ const DEFAULT: ScheduleConfig = {
   cron: "0 17 * * 5",
   postTo: "dm",
   window: "last-week",
+  timezone: "Asia/Kolkata",
 };
 
 export const readSchedule = (): ScheduleConfig => {

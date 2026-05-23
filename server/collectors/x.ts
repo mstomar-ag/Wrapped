@@ -1,10 +1,7 @@
 import { Member } from "../members/types";
 import { DateWindow, XSignals } from "./types";
 
-export const collectX = async (
-  member: Member,
-  win: DateWindow,
-): Promise<XSignals | null> => {
+export const collectX = async (member: Member, win: DateWindow): Promise<XSignals | null> => {
   const token = process.env.X_BEARER_TOKEN;
   const handle = member.socials.x?.handle;
   if (!token || !handle) return null;
@@ -23,10 +20,9 @@ export const collectX = async (
     end_time: win.end.toISOString(),
     "tweet.fields": "public_metrics,created_at",
   });
-  const tweetsRes = await fetch(
-    `https://api.twitter.com/2/users/${userId}/tweets?${params}`,
-    { headers: { Authorization: `Bearer ${token}` } },
-  );
+  const tweetsRes = await fetch(`https://api.twitter.com/2/users/${userId}/tweets?${params}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
   if (!tweetsRes.ok) return null;
   const tweetsJson = (await tweetsRes.json()) as {
     data?: Array<{

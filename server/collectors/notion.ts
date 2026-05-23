@@ -42,17 +42,15 @@ export const collectNotion = async (
   };
   const json = (await res.json()) as { results?: NotionPage[] };
 
-  const inWindow = (iso?: string) =>
-    iso && new Date(iso) >= win.start && new Date(iso) <= win.end;
+  const inWindow = (iso?: string) => iso && new Date(iso) >= win.start && new Date(iso) <= win.end;
 
   const edited =
     json.results?.filter(
       (p) => p.last_edited_by?.id === notionUserId && inWindow(p.last_edited_time),
     ) ?? [];
   const created =
-    json.results?.filter(
-      (p) => p.created_by?.id === notionUserId && inWindow(p.created_time),
-    ) ?? [];
+    json.results?.filter((p) => p.created_by?.id === notionUserId && inWindow(p.created_time)) ??
+    [];
 
   const titleOf = (p: NotionPage): string => {
     const titleProp = Object.values(p.properties ?? {}).find(

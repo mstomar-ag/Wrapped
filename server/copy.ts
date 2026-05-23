@@ -21,10 +21,7 @@ Tone: confident, warm, slightly playful. Never sycophantic. Never generic.
 Constraints: every field must be brief — week title under 4 words, vibe one sentence under 14 words, commit summary one sentence under 18 words.
 Avoid emoji, hashtags, and marketing language. No exclamation points.`;
 
-export const generateCopy = async (
-  name: string,
-  signals: AllSignals,
-): Promise<CopyOverrides> => {
+export const generateCopy = async (name: string, signals: AllSignals): Promise<CopyOverrides> => {
   const llm = getClient();
   if (!llm) return {};
 

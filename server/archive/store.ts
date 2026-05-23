@@ -42,10 +42,7 @@ export const createEntry = (
   return entry;
 };
 
-export const updateEntry = (
-  id: string,
-  patch: Partial<ArchiveEntry>,
-): ArchiveEntry | undefined => {
+export const updateEntry = (id: string, patch: Partial<ArchiveEntry>): ArchiveEntry | undefined => {
   const all = read();
   const idx = all.findIndex((e) => e.id === id);
   if (idx === -1) return undefined;
@@ -64,8 +61,7 @@ export const setStatus = (
   return e;
 };
 
-export const getEntry = (id: string): ArchiveEntry | undefined =>
-  read().find((e) => e.id === id);
+export const getEntry = (id: string): ArchiveEntry | undefined => read().find((e) => e.id === id);
 
 export type ArchiveFilters = {
   subject?: string;

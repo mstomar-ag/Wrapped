@@ -18,7 +18,14 @@ export const EmojiScene: React.FC<{ data: WrappedData }> = ({ data }) => {
 
   return (
     <SceneBG palette={p} variant="blobs">
-      <AbsoluteFill style={{ padding: "200px 90px", color: p.fg, justifyContent: "flex-start", alignItems: "center" }}>
+      <AbsoluteFill
+        style={{
+          padding: "200px 90px",
+          color: p.fg,
+          justifyContent: "flex-start",
+          alignItems: "center",
+        }}
+      >
         <div
           style={{
             fontSize: 56,

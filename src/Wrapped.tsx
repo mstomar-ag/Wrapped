@@ -33,19 +33,10 @@ export const WRAPPED_DURATION = SCENES.reduce((s, x) => s + x.dur, 0);
 const Soundtrack: React.FC<{ track: string }> = ({ track }) => {
   const frame = useCurrentFrame();
   const fadeIn = interpolate(frame, [0, 20], [0, 1], { extrapolateRight: "clamp" });
-  const fadeOut = interpolate(
-    frame,
-    [WRAPPED_DURATION - 30, WRAPPED_DURATION],
-    [1, 0],
-    { extrapolateLeft: "clamp" },
-  );
-  return (
-    <Audio
-      src={staticFile(track)}
-      volume={Math.min(fadeIn, fadeOut) * 0.85}
-      startFrom={0}
-    />
-  );
+  const fadeOut = interpolate(frame, [WRAPPED_DURATION - 30, WRAPPED_DURATION], [1, 0], {
+    extrapolateLeft: "clamp",
+  });
+  return <Audio src={staticFile(track)} volume={Math.min(fadeIn, fadeOut) * 0.85} startFrom={0} />;
 };
 
 export const Wrapped: React.FC<{ data: WrappedData }> = ({ data }) => {

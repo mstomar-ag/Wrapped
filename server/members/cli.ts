@@ -28,83 +28,83 @@ const usage = () => {
 };
 
 const run = async () => {
-switch (cmd) {
-  case "list": {
-    const all = listMembers();
-    if (!all.length) console.log("(empty)");
-    for (const m of all) {
-      const s = m.socials;
-      console.log(
-        `${m.id.padEnd(16)} ${m.name.padEnd(20)} slack=${s.slack?.handle ?? "-"} github=${s.github?.username ?? "-"} x=${s.x?.handle ?? "-"} email=${s.email ?? "-"}`,
-      );
+  switch (cmd) {
+    case "list": {
+      const all = listMembers();
+      if (!all.length) console.log("(empty)");
+      for (const m of all) {
+        const s = m.socials;
+        console.log(
+          `${m.id.padEnd(16)} ${m.name.padEnd(20)} slack=${s.slack?.handle ?? "-"} github=${s.github?.username ?? "-"} x=${s.x?.handle ?? "-"} email=${s.email ?? "-"}`,
+        );
+      }
+      break;
     }
-    break;
-  }
-  case "add": {
-    const a = argMap(rest);
-    if (!a.name || !a.slack) {
-      usage();
-      process.exit(1);
+    case "add": {
+      const a = argMap(rest);
+      if (!a.name || !a.slack) {
+        usage();
+        process.exit(1);
+      }
+      const id = a.slack.toLowerCase();
+      const m: Member = {
+        id,
+        name: a.name,
+        role: a.role,
+        socials: {
+          slack: { handle: a.slack, userId: a["slack-id"] },
+          github: a.github ? { username: a.github } : undefined,
+          x: a.x ? { handle: a.x } : undefined,
+          linkedin: a.linkedin ? { handle: a.linkedin } : undefined,
+          email: a.email,
+        },
+      };
+      upsertMember(m);
+      console.log(`added ${id}`);
+      break;
     }
-    const id = a.slack.toLowerCase();
-    const m: Member = {
-      id,
-      name: a.name,
-      role: a.role,
-      socials: {
-        slack: { handle: a.slack, userId: a["slack-id"] },
+    case "link": {
+      const [id, ...flags] = rest;
+      if (!id) {
+        usage();
+        process.exit(1);
+      }
+      const a = argMap(flags);
+      const existing = findMember(id);
+      if (!existing) {
+        console.error(`no member: ${id}`);
+        process.exit(1);
+      }
+      updateSocials(existing.id, {
         github: a.github ? { username: a.github } : undefined,
         x: a.x ? { handle: a.x } : undefined,
         linkedin: a.linkedin ? { handle: a.linkedin } : undefined,
         email: a.email,
-      },
-    };
-    upsertMember(m);
-    console.log(`added ${id}`);
-    break;
-  }
-  case "link": {
-    const [id, ...flags] = rest;
-    if (!id) {
+      });
+      console.log(`updated ${existing.id}`);
+      break;
+    }
+    case "remove": {
+      const [id] = rest;
+      if (!id) {
+        usage();
+        process.exit(1);
+      }
+      const ok = deleteMember(id);
+      console.log(ok ? `removed ${id}` : `no member: ${id}`);
+      break;
+    }
+    case "sync-slack": {
+      const r = await syncMembersFromSlack();
+      console.log(
+        `Synced ${r.total} members from Slack (${r.added} new, ${r.updated} updated, ${r.skipped} skipped bots/deleted)`,
+      );
+      break;
+    }
+    default:
       usage();
       process.exit(1);
-    }
-    const a = argMap(flags);
-    const existing = findMember(id);
-    if (!existing) {
-      console.error(`no member: ${id}`);
-      process.exit(1);
-    }
-    updateSocials(existing.id, {
-      github: a.github ? { username: a.github } : undefined,
-      x: a.x ? { handle: a.x } : undefined,
-      linkedin: a.linkedin ? { handle: a.linkedin } : undefined,
-      email: a.email,
-    });
-    console.log(`updated ${existing.id}`);
-    break;
   }
-  case "remove": {
-    const [id] = rest;
-    if (!id) {
-      usage();
-      process.exit(1);
-    }
-    const ok = deleteMember(id);
-    console.log(ok ? `removed ${id}` : `no member: ${id}`);
-    break;
-  }
-  case "sync-slack": {
-    const r = await syncMembersFromSlack();
-    console.log(
-      `Synced ${r.total} members from Slack (${r.added} new, ${r.updated} updated, ${r.skipped} skipped bots/deleted)`,
-    );
-    break;
-  }
-  default:
-    usage();
-    process.exit(1);
-}
 };
 
 run().catch((e) => {

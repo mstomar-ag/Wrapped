@@ -15,20 +15,18 @@ import {
   deleteMember,
 } from "./members/store";
 import { resolveOrDiscover } from "./members/discover";
-import { parseAny, parseWindow, parseRange } from "./window";
+import { parseAny, parseRange, labelWindow } from "./window";
 import { collectAll, buildWrappedData } from "./aggregator";
 import { generateCopy } from "./copy";
-import { renderWrapped } from "./render";
 import { verifySlackSignature } from "./slack/verify";
 import { respondToSlashCommand } from "./slack/post";
-import { runWrapForMember, runWrapForChannel } from "./wrap-runner";
+import { startWrapForMember, runWrapForMember, runWrapForChannel } from "./wrap-runner";
 import { resolveChannel } from "./channels/lookup";
-import {
-  createEntry,
-  listEntries,
-  getEntry,
-  deleteEntry,
-} from "./archive/store";
+import { listEntries, getEntry, deleteEntry } from "./archive/store";
+import { toPublicArchiveEntry } from "./archive/public";
+import { resolveProjectPath, videoFileReady } from "./paths";
+import { streamMp4File } from "./media";
+import { SLACK_WRAP_ETA } from "./timezone";
 import { readSchedule, writeSchedule } from "./scheduler/config";
 import { startScheduler, restartScheduler, runWeekly } from "./scheduler/weekly";
 import {
@@ -43,7 +41,10 @@ import { DateWindow } from "./collectors/types";
 
 const app = new Hono();
 
-app.use("*", logger((line) => console.log(`[${new Date().toISOString()}] ${line}`)));
+app.use(
+  "*",
+  logger((line) => console.log(`[${new Date().toISOString()}] ${line}`)),
+);
 app.use("*", requireSignIn);
 
 // ─── Public ──────────────────────────────────────────────────────────────────
@@ -149,6 +150,32 @@ app.get("/api/wrapped", async (c) => {
   return c.json({ data, signals });
 });
 
+// ─── Window preview (UI date picker) ─────────────────────────────────────────
+app.post("/api/window/preview", async (c) => {
+  const body = (await c.req.json()) as {
+    window?: string;
+    from?: string;
+    to?: string;
+    since?: string;
+    joinDate?: string;
+  };
+  try {
+    let win: DateWindow;
+    if (body.from) win = parseRange(body.from, body.to);
+    else if (body.since)
+      win = parseAny(body.since, body.joinDate ? new Date(body.joinDate) : undefined);
+    else win = parseAny(body.window, body.joinDate ? new Date(body.joinDate) : undefined);
+    return c.json({
+      label: labelWindow(win),
+      from: win.start.toISOString(),
+      to: win.end.toISOString(),
+      preset: body.window ?? null,
+    });
+  } catch (e) {
+    return c.json({ error: (e as Error).message }, 400);
+  }
+});
+
 // ─── Wrapped — async render, stored in archive ───────────────────────────────
 app.post("/api/wrapped/generate", async (c) => {
   const body = (await c.req.json()) as {
@@ -164,24 +191,26 @@ app.post("/api/wrapped/generate", async (c) => {
   let win: DateWindow;
   try {
     if (body.from) win = parseRange(body.from, body.to);
-    else if (body.since) win = parseAny(body.since, member.joinDate ? new Date(member.joinDate) : undefined);
-    else win = parseAny(body.window, member.joinDate ? new Date(member.joinDate) : undefined);
+    else if (body.since)
+      win = parseAny(body.since, member.joinDate ? new Date(member.joinDate) : undefined);
+    else
+      win = parseAny(
+        body.window ?? "last-week",
+        member.joinDate ? new Date(member.joinDate) : undefined,
+      );
   } catch (e) {
     return c.json({ error: (e as Error).message }, 400);
   }
 
   const session = getSession(c);
-  const entry = await Promise.resolve().then(() =>
-    runWrapForMember({
-      member,
-      win,
-      source: "ui",
-      triggeredBy: session?.email,
-      post: null, // UI never auto-posts to Slack
-    }),
-  );
-  // Return immediately with the queued id; client polls
-  return c.json({ id: entry.id });
+  const entry = startWrapForMember({
+    member,
+    win,
+    source: "ui",
+    triggeredBy: session?.email,
+    post: null,
+  });
+  return c.json({ id: entry.id, windowLabel: entry.windowLabel });
 });
 
 // ─── Channels — by name ──────────────────────────────────────────────────────
@@ -222,27 +251,28 @@ app.get("/api/channels/resolve/:name", async (c) => {
 
 // ─── Archive ─────────────────────────────────────────────────────────────────
 app.get("/api/archive", (c) => {
+  const rawKind = c.req.query("kind");
+  const kind = rawKind === "member" || rawKind === "channel" ? rawKind : undefined;
   const entries = listEntries({
     subject: c.req.query("subject"),
-    kind: c.req.query("kind") as "member" | "channel" | undefined,
+    kind,
     status: c.req.query("status") as never,
     limit: c.req.query("limit") ? Number(c.req.query("limit")) : 100,
   });
-  return c.json({ entries });
+  return c.json({ entries: entries.map(toPublicArchiveEntry) });
 });
 
 app.get("/api/archive/:id", (c) => {
   const e = getEntry(c.req.param("id"));
-  return e ? c.json(e) : c.json({ error: "not found" }, 404);
+  return e ? c.json(toPublicArchiveEntry(e)) : c.json({ error: "not found" }, 404);
 });
 
 app.get("/api/archive/:id/video", (c) => {
   const e = getEntry(c.req.param("id"));
-  if (!e?.filePath || !fs.existsSync(e.filePath)) return c.json({ error: "no video" }, 404);
-  const stream = fs.createReadStream(e.filePath);
-  return new Response(stream as unknown as ReadableStream, {
-    headers: { "content-type": "video/mp4" },
-  });
+  if (!e?.filePath) return c.json({ error: "no video" }, 404);
+  const filePath = resolveProjectPath(e.filePath);
+  if (!videoFileReady(e.filePath)) return c.json({ error: "video file missing on server" }, 404);
+  return streamMp4File(c, filePath);
 });
 
 app.delete("/api/archive/:id", (c) => c.json({ ok: deleteEntry(c.req.param("id")) }));
@@ -325,7 +355,10 @@ app.post("/api/slack/command", async (c) => {
         text: "Usage: /wrapped link @user [github|x|linkedin|email] <value>",
       });
     updateSocials(member.id, patch);
-    return c.json({ response_type: "ephemeral", text: `Linked ${source}=${value} to ${member.name}.` });
+    return c.json({
+      response_type: "ephemeral",
+      text: `Linked ${source}=${value} to ${member.name}.`,
+    });
   }
 
   // /wrapped #channel-name [window]
@@ -354,7 +387,10 @@ app.post("/api/slack/command", async (c) => {
         await respondToSlashCommand(responseUrl, `Group wrap failed: ${(e as Error).message}`);
       }
     })();
-    return c.json({ response_type: "ephemeral", text: `Wrapping that channel… (~30-60s)` });
+    return c.json({
+      response_type: "ephemeral",
+      text: `Wrapping that channel… (${SLACK_WRAP_ETA})`,
+    });
   }
 
   // /wrapped @user [window/range]
@@ -372,7 +408,10 @@ app.post("/api/slack/command", async (c) => {
   try {
     win = parseAny(winToken, member.joinDate ? new Date(member.joinDate) : undefined);
   } catch (e) {
-    return c.json({ response_type: "ephemeral", text: `Bad window: ${(e as Error).message}. Try \`/wrapped help\`.` });
+    return c.json({
+      response_type: "ephemeral",
+      text: `Bad window: ${(e as Error).message}. Try \`/wrapped help\`.`,
+    });
   }
 
   (async () => {
@@ -391,7 +430,10 @@ app.post("/api/slack/command", async (c) => {
     }
   })();
 
-  return c.json({ response_type: "ephemeral", text: `Cooking ${member.name}'s Wrapped reel… (~30-60s)` });
+  return c.json({
+    response_type: "ephemeral",
+    text: `Cooking ${member.name}'s Wrapped reel… (${SLACK_WRAP_ETA})`,
+  });
 });
 
 // ─── Frontend ────────────────────────────────────────────────────────────────

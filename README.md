@@ -154,7 +154,7 @@ POST /api/slack/command
 
 ## Trust model in one paragraph
 
-The Wrapped bot has **workspace-level** read access (a Slack bot token, a GitHub PAT, an X bearer). With these it can look up *any* teammate's public activity. End users never see, provide, or grant tokens. LinkedIn and personal email genuinely need per-user OAuth (no app-only access exists) so they're treated as optional enrichments, not requirements.
+The Wrapped bot has **workspace-level** read access (a Slack bot token, a GitHub PAT, an X bearer). With these it can look up _any_ teammate's public activity. End users never see, provide, or grant tokens. LinkedIn and personal email genuinely need per-user OAuth (no app-only access exists) so they're treated as optional enrichments, not requirements.
 
 ---
 
@@ -166,17 +166,18 @@ The Wrapped bot has **workspace-level** read access (a Slack bot token, a GitHub
 - There is no per-user visibility filter on the API. `GET /api/archive` returns everything.
 - This matches the original Spotify-Wrapped-style spirit: the reels are meant to be shared, quoted, roasted in #random — not hidden in private profiles.
 
-**What we deliberately *do not* do:**
+**What we deliberately _do not_ do:**
+
 - Generating a reel from the UI does **not** post to Slack. UI-generated wraps are private to the people browsing the archive in the UI.
 - The Slack slash command **does** post the resulting MP4 back to the channel where it was run — that's the user-visible Slack experience.
 
-| Trigger | Saved in archive | Posted to Slack |
-|---|---|---|
-| `POST /api/wrapped/generate` (UI) | ✅ | ❌ |
-| `POST /api/channels/wrap` (UI) | ✅ | ❌ |
-| `/wrapped @user` (Slack) | ✅ | ✅ to the channel where command ran |
-| `/wrapped #channel` (Slack) | ✅ | ✅ to the channel where command ran |
-| Weekly scheduler | ✅ | ✅ to configured DM or channel |
+| Trigger                           | Saved in archive | Posted to Slack                     |
+| --------------------------------- | ---------------- | ----------------------------------- |
+| `POST /api/wrapped/generate` (UI) | ✅               | ❌                                  |
+| `POST /api/channels/wrap` (UI)    | ✅               | ❌                                  |
+| `/wrapped @user` (Slack)          | ✅               | ✅ to the channel where command ran |
+| `/wrapped #channel` (Slack)       | ✅               | ✅ to the channel where command ran |
+| Weekly scheduler                  | ✅               | ✅ to configured DM or channel      |
 
 If you ever want to make wraps private (per-user visibility, hidden from the org), it's a single-place change: add a filter to `listEntries` in `server/archive/store.ts` requiring `triggeredBy === session.email`. The architecture is ready for it; we just don't apply the filter today by design.
 
@@ -186,14 +187,14 @@ If you ever want to make wraps private (per-user visibility, hidden from the org
 
 All persistence is **flat JSON on disk** plus rendered MP4 files. This is a deliberate choice for a 20-person team — scale is small, data is tiny (< 10 MB after a year of weekly wraps), and portability matters.
 
-| Data | Path | Format |
-|---|---|---|
-| Members | `data/members.json` | JSON array, hand-editable |
-| Archive (every wrap ever) | `data/archive.json` | JSON array, newest first |
-| Schedule config | `data/schedule.json` | one object |
-| OAuth tokens (v2 self-link) | `data/tokens.json` | AES-GCM encrypted |
-| Rendered videos | `out/cache/<sha256>.mp4` | named by content hash for free dedupe |
-| Auth session | HS256-signed `wrapped_session` cookie | **stateless** — no server store |
+| Data                        | Path                                  | Format                                |
+| --------------------------- | ------------------------------------- | ------------------------------------- |
+| Members                     | `data/members.json`                   | JSON array, hand-editable             |
+| Archive (every wrap ever)   | `data/archive.json`                   | JSON array, newest first              |
+| Schedule config             | `data/schedule.json`                  | one object                            |
+| OAuth tokens (v2 self-link) | `data/tokens.json`                    | AES-GCM encrypted                     |
+| Rendered videos             | `out/cache/<sha256>.mp4`              | named by content hash for free dedupe |
+| Auth session                | HS256-signed `wrapped_session` cookie | **stateless** — no server store       |
 
 **For deployments, two paths must be mounted as persistent volumes:** `data/` (registry + archive metadata) and `out/` (the videos themselves). Losing `out/` loses the videos; losing `data/` loses the archive index and member registry. If budget is tight, you can let `out/cache/` be ephemeral and re-render on demand — the cache is content-addressed so it'll repopulate.
 

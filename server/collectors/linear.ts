@@ -78,9 +78,7 @@ export const collectLinear = async (
   }
   const topProjectEntry = [...projectCounts.entries()].sort((a, b) => b[1] - a[1])[0];
 
-  const topIssue = [...completedIssues].sort(
-    (a, b) => (b.estimate ?? 0) - (a.estimate ?? 0),
-  )[0];
+  const topIssue = [...completedIssues].sort((a, b) => (b.estimate ?? 0) - (a.estimate ?? 0))[0];
 
   return {
     issuesCompleted: completedIssues.length,

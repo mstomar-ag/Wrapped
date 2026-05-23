@@ -3,7 +3,10 @@ import { Member } from "./types";
 import { findMember, upsertMember } from "./store";
 
 const slugify = (s: string) =>
-  s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "user";
+  s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "user";
 
 const slackClient = () => {
   const token = process.env.SLACK_BOT_TOKEN;

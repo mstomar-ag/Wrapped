@@ -87,17 +87,17 @@ In the dashboard: **Service → Settings → Volumes** → add both mount paths.
 
 Set in **Railway → Service → Variables** (or CLI). Minimum for Slack wraps:
 
-| Variable | Required |
-|----------|----------|
-| `SLACK_BOT_TOKEN` | Yes |
-| `SLACK_SIGNING_SECRET` | Yes |
-| `GITHUB_TOKEN` | Yes (org repos; authorize SSO on the PAT) |
-| `PORT` | Railway sets automatically; app defaults to `3000` |
-| `PUBLIC_BASE_URL` | Yes once public URL exists (OAuth callbacks) |
-| `ANTHROPIC_API_KEY` / `GEMINI_API_KEY` / `OPENROUTER_API_KEY` | Optional (copy) |
-| `X_BEARER_TOKEN`, `LINEAR_API_KEY`, `NOTION_TOKEN` | Optional |
-| `ENCRYPTION_KEY` | If using OAuth self-link |
-| `GITHUB_ORG` | Optional (`Agrim-Intelligence`) |
+| Variable                                                      | Required                                           |
+| ------------------------------------------------------------- | -------------------------------------------------- |
+| `SLACK_BOT_TOKEN`                                             | Yes                                                |
+| `SLACK_SIGNING_SECRET`                                        | Yes                                                |
+| `GITHUB_TOKEN`                                                | Yes (org repos; authorize SSO on the PAT)          |
+| `PORT`                                                        | Railway sets automatically; app defaults to `3000` |
+| `PUBLIC_BASE_URL`                                             | Yes once public URL exists (OAuth callbacks)       |
+| `ANTHROPIC_API_KEY` / `GEMINI_API_KEY` / `OPENROUTER_API_KEY` | Optional (copy)                                    |
+| `X_BEARER_TOKEN`, `LINEAR_API_KEY`, `NOTION_TOKEN`            | Optional                                           |
+| `ENCRYPTION_KEY`                                              | If using OAuth self-link                           |
+| `GITHUB_ORG`                                                  | Optional (`Agrim-Intelligence`)                    |
 
 ```bash
 # Example (run one at a time; never commit values)
@@ -127,17 +127,17 @@ Or connect the GitHub repo in Railway for deploy-on-push.
 
 ## Makefile reference
 
-| Target | Action |
-|--------|--------|
-| `make railway-install` | Install CLI via Homebrew |
-| `make railway-login` | Browser login |
-| `make railway-whoami` | Show logged-in user |
-| `make railway-init` | Create + link project in workspace |
-| `make railway-link` | Link directory to existing project |
-| `make railway-status` | Linked project / service |
-| `make railway-volume` | Add `/app/data` + `/app/out` volumes |
-| `make railway-vars` | Print variable setup reminder |
-| `make railway-deploy` | **Deploy** (`railway up`) — use deliberately |
+| Target                 | Action                                       |
+| ---------------------- | -------------------------------------------- |
+| `make railway-install` | Install CLI via Homebrew                     |
+| `make railway-login`   | Browser login                                |
+| `make railway-whoami`  | Show logged-in user                          |
+| `make railway-init`    | Create + link project in workspace           |
+| `make railway-link`    | Link directory to existing project           |
+| `make railway-status`  | Linked project / service                     |
+| `make railway-volume`  | Add `/app/data` + `/app/out` volumes         |
+| `make railway-vars`    | Print variable setup reminder                |
+| `make railway-deploy`  | **Deploy** (`railway up`) — use deliberately |
 
 Defaults (override on the command line):
 

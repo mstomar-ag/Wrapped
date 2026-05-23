@@ -28,9 +28,14 @@ export type ArchiveEntry = {
   subjectName: string;
   windowFrom: string;
   windowTo: string;
+  windowLabel?: string;
   createdAt: string;
   status: "queued" | "rendering" | "ready" | "failed";
+  progress?: number;
+  phase?: string;
+  progressMessage?: string;
   filePath?: string;
+  hasVideo?: boolean;
   error?: string;
 };
 
@@ -88,12 +93,19 @@ export const api = {
   unlinkProvider: (id: string, provider: string) =>
     fetch(`/api/members/${id}/links/${provider}`, { method: "DELETE" }).then((r) => json<{ ok: boolean }>(r)),
 
+  previewWindow: (body: { window?: string; from?: string; to?: string; since?: string; joinDate?: string }) =>
+    fetch("/api/window/preview", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body),
+    }).then((r) => json<{ label: string; from: string; to: string; preset: string | null }>(r)),
+
   generate: (body: { member: string; from?: string; to?: string; window?: string }) =>
     fetch("/api/wrapped/generate", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(body),
-    }).then((r) => json<{ id: string }>(r)),
+    }).then((r) => json<{ id: string; windowLabel?: string }>(r)),
 
   groupWrap: (channelId: string, body: { from?: string; to?: string; window?: string }) =>
     fetch(`/api/channels/${channelId}/wrap`, {
@@ -103,8 +115,12 @@ export const api = {
     }).then((r) => json<{ id: string }>(r)),
 
   listArchive: (filters: { subject?: string; kind?: string; limit?: number } = {}) => {
-    const q = new URLSearchParams(filters as Record<string, string>).toString();
-    return fetch(`/api/archive${q ? "?" + q : ""}`).then((r) => json<{ entries: ArchiveEntry[] }>(r));
+    const q = new URLSearchParams();
+    if (filters.subject) q.set("subject", filters.subject);
+    if (filters.kind) q.set("kind", filters.kind);
+    if (filters.limit != null) q.set("limit", String(filters.limit));
+    const qs = q.toString();
+    return fetch(`/api/archive${qs ? `?${qs}` : ""}`).then((r) => json<{ entries: ArchiveEntry[] }>(r));
   },
   getArchiveEntry: (id: string) => fetch(`/api/archive/${id}`).then((r) => json<ArchiveEntry>(r)),
   videoUrl: (id: string) => `/api/archive/${id}/video`,

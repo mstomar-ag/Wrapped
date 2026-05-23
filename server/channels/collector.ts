@@ -1,4 +1,5 @@
 import { WebClient } from "@slack/web-api";
+import { hourInAppTz } from "../timezone";
 import { DateWindow } from "../collectors/types";
 
 export type ChannelSignals = {
@@ -48,7 +49,7 @@ export const collectChannel = async (
     posterCounts.set(m.user, (posterCounts.get(m.user) ?? 0) + 1);
     const ts = parseFloat(m.ts ?? "0");
     tsList.push(ts);
-    const hour = new Date(ts * 1000).getHours();
+    const hour = hourInAppTz(new Date(ts * 1000));
     hourBuckets[hour]++;
     const emojis = (m.text ?? "").match(/:[a-z0-9_+-]+:/gi) ?? [];
     for (const e of emojis) emojiCounts.set(e, (emojiCounts.get(e) ?? 0) + 1);
@@ -64,10 +65,7 @@ export const collectChannel = async (
     const userInfo = await slack.users.info({ user: topPosterEntry[0] }).catch(() => null);
     topPoster = {
       userId: topPosterEntry[0],
-      name:
-        userInfo?.user?.profile?.real_name ??
-        userInfo?.user?.name ??
-        topPosterEntry[0],
+      name: userInfo?.user?.profile?.real_name ?? userInfo?.user?.name ?? topPosterEntry[0],
       count: topPosterEntry[1],
     };
   }

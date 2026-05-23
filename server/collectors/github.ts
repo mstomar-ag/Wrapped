@@ -61,7 +61,7 @@ export const collectGitHub = async (
   }
 
   return {
-    commitCount: search.data.total_count ?? (search.data.items?.length ?? 0),
+    commitCount: search.data.total_count ?? search.data.items?.length ?? 0,
     additions,
     deletions,
     topCommit,

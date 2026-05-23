@@ -2,11 +2,7 @@ import { WebClient } from "@slack/web-api";
 import fs from "node:fs";
 import path from "node:path";
 
-export const postVideoToChannel = async (
-  channelId: string,
-  filePath: string,
-  comment: string,
-) => {
+export const postVideoToChannel = async (channelId: string, filePath: string, comment: string) => {
   const token = process.env.SLACK_BOT_TOKEN;
   if (!token) {
     console.log(`[stub] would post ${filePath} to ${channelId}: ${comment}`);

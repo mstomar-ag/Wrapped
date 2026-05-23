@@ -2,12 +2,19 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api, ArchiveEntry } from "../api";
 import { StatusBadge } from "../components/StatusBadge";
+import { fmtDateTime, fmtRange } from "../format";
 
 export const Archive: React.FC = () => {
   const [entries, setEntries] = useState<ArchiveEntry[]>([]);
   const [kind, setKind] = useState<string>("");
 
-  const refresh = () => api.listArchive({ kind: kind || undefined, limit: 200 }).then((r) => setEntries(r.entries));
+  const refresh = () =>
+    api
+      .listArchive({
+        ...(kind === "member" || kind === "channel" ? { kind } : {}),
+        limit: 200,
+      })
+      .then((r) => setEntries(r.entries));
 
   useEffect(() => {
     refresh();
@@ -52,10 +59,15 @@ export const Archive: React.FC = () => {
                   <Link to={`/archive/${e.id}`}>{e.subjectName}</Link>
                 </td>
                 <td className="muted">
-                  {new Date(e.windowFrom).toLocaleDateString()} → {new Date(e.windowTo).toLocaleDateString()}
+                  {e.windowLabel ?? fmtRange(e.windowFrom, e.windowTo)}
                 </td>
-                <td className="muted">{new Date(e.createdAt).toLocaleString()}</td>
-                <td><StatusBadge status={e.status} /></td>
+                <td className="muted">{fmtDateTime(e.createdAt)}</td>
+                <td>
+                  <StatusBadge status={e.status} />
+                  {e.status === "ready" && e.hasVideo === false && (
+                    <span className="muted" style={{ fontSize: 11, marginLeft: 6 }}>no file</span>
+                  )}
+                </td>
                 <td><button className="ghost" onClick={() => del(e.id)}>Delete</button></td>
               </tr>
             ))}

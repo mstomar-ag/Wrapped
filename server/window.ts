@@ -1,4 +1,12 @@
 import { DateWindow } from "./collectors/types";
+import {
+  APP_TIMEZONE,
+  addCalendarDays,
+  calendarYmd,
+  formatLabelDate,
+  istEndOfDay,
+  istStartOfDay,
+} from "./timezone";
 
 // Cap to keep API/render costs sane. A year is the deepest we'll look back.
 const MAX_WINDOW_DAYS = 365;
@@ -11,12 +19,8 @@ const clamp = (win: DateWindow): DateWindow => {
   return win;
 };
 
-const labelOf = (win: DateWindow): string => {
-  const opts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric", year: "numeric" };
-  const a = win.start.toLocaleDateString("en-US", opts);
-  const b = win.end.toLocaleDateString("en-US", opts);
-  return `${a} – ${b}`;
-};
+const labelOf = (win: DateWindow): string =>
+  `${formatLabelDate(win.start)} – ${formatLabelDate(win.end)}`;
 
 export const labelWindow = labelOf;
 
@@ -32,55 +36,73 @@ export const PRESETS = [
 ] as const;
 export type WindowPreset = (typeof PRESETS)[number];
 
+/** Parse presets using IST calendar days (see APP_TIMEZONE). */
 export const parseWindow = (token: string | undefined, now = new Date()): DateWindow => {
-  const end = new Date(now);
-  const start = new Date(now);
+  const today = calendarYmd(now);
+  let start: Date;
+  let end: Date;
+
   switch ((token ?? "last-week").toLowerCase()) {
-    case "yesterday":
-      start.setDate(start.getDate() - 1);
-      start.setHours(0, 0, 0, 0);
-      end.setDate(end.getDate() - 1);
-      end.setHours(23, 59, 59, 999);
+    case "yesterday": {
+      const y = addCalendarDays(today, -1);
+      start = istStartOfDay(y);
+      end = istEndOfDay(y);
       break;
+    }
     case "today":
-      start.setHours(0, 0, 0, 0);
+      start = istStartOfDay(today);
+      end = istEndOfDay(today);
       break;
-    case "this-month":
-      start.setDate(1);
-      start.setHours(0, 0, 0, 0);
+    case "this-month": {
+      const [y, m] = today.split("-");
+      start = istStartOfDay(`${y}-${m}-01`);
+      end = istEndOfDay(today);
       break;
-    case "last-month":
-      start.setMonth(start.getMonth() - 1);
-      start.setDate(1);
-      start.setHours(0, 0, 0, 0);
-      end.setDate(0);
-      end.setHours(23, 59, 59, 999);
+    }
+    case "last-month": {
+      const firstThisMonth = istStartOfDay(`${today.slice(0, 7)}-01`);
+      end = new Date(firstThisMonth.getTime() - 1);
+      const lastDay = calendarYmd(end);
+      start = istStartOfDay(`${lastDay.slice(0, 7)}-01`);
+      end = istEndOfDay(lastDay);
       break;
-    case "last-quarter":
-      start.setDate(start.getDate() - 90);
+    }
+    case "last-quarter": {
+      const startYmd = addCalendarDays(today, -90);
+      start = istStartOfDay(startYmd);
+      end = istEndOfDay(today);
       break;
-    case "all-time":
-      start.setMonth(start.getMonth() - 12);
+    }
+    case "all-time": {
+      const startYmd = addCalendarDays(today, -365);
+      start = istStartOfDay(startYmd);
+      end = istEndOfDay(today);
       break;
+    }
     case "last-week":
-    default:
-      start.setDate(start.getDate() - 7);
+    default: {
+      const startYmd = addCalendarDays(today, -7);
+      start = istStartOfDay(startYmd);
+      end = istEndOfDay(today);
       break;
+    }
   }
   return clamp({ start, end });
 };
 
-// Custom range: ISO strings or YYYY-MM-DD. Supports "from..to" syntax.
+// Custom range: ISO strings or YYYY-MM-DD interpreted as IST calendar days.
 export const parseRange = (from: string, to?: string): DateWindow => {
   let f = from;
   let t = to;
   if (!t && from.includes("..")) [f, t] = from.split("..");
-  const start = new Date(f);
-  const end = t ? new Date(t) : new Date();
+  const startYmd = f.slice(0, 10);
+  const endYmd = (t ?? f).slice(0, 10);
+  const start = istStartOfDay(startYmd);
+  const end = istEndOfDay(endYmd);
   if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
     throw new Error(`Invalid date range "${from}${to ? `..${to}` : ""}" — use ISO or YYYY-MM-DD`);
   }
-  if (start >= end) throw new Error("`from` must be before `to`");
+  if (start > end) throw new Error("`from` must be on or before `to`");
   return clamp({ start, end });
 };
 
@@ -91,7 +113,7 @@ export const parseSince = (token: string, joinDate?: Date): DateWindow => {
   const tail = m[1];
   if (tail === "joined") {
     if (!joinDate) throw new Error("Member has no joinDate set");
-    return clamp({ start: joinDate, end: new Date() });
+    return clamp({ start: joinDate, end: istEndOfDay(calendarYmd(new Date())) });
   }
   return parseRange(tail);
 };
@@ -104,3 +126,5 @@ export const parseAny = (raw: string | undefined, joinDate?: Date): DateWindow =
   if (trimmed.includes("..")) return parseRange(trimmed);
   return parseWindow(trimmed);
 };
+
+export { APP_TIMEZONE };

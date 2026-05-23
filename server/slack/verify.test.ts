@@ -5,8 +5,7 @@ import { verifySlackSignature } from "./verify";
 const SECRET = "test-secret-abcdef";
 
 const sign = (body: string, ts: string) =>
-  "v0=" +
-  crypto.createHmac("sha256", SECRET).update(`v0:${ts}:${body}`).digest("hex");
+  "v0=" + crypto.createHmac("sha256", SECRET).update(`v0:${ts}:${body}`).digest("hex");
 
 describe("verifySlackSignature", () => {
   beforeEach(() => {

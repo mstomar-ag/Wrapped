@@ -36,19 +36,15 @@ describe("buildWrappedData", () => {
   });
 
   it("uses real github data when present", () => {
-    const data = buildWrappedData(
-      member,
-      win,
-      {
-        ...emptySignals,
-        github: {
-          commitCount: 12,
-          additions: 100,
-          deletions: 50,
-          topCommit: { repo: "x/y", sha: "abc1234", message: "fix", additions: 10, deletions: 5 },
-        },
+    const data = buildWrappedData(member, win, {
+      ...emptySignals,
+      github: {
+        commitCount: 12,
+        additions: 100,
+        deletions: 50,
+        topCommit: { repo: "x/y", sha: "abc1234", message: "fix", additions: 10, deletions: 5 },
       },
-    );
+    });
     expect(data.numbers.commits).toBe(12);
     expect(data.commit.repo).toBe("x/y");
   });

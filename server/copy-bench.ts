@@ -2,7 +2,14 @@ import "dotenv/config";
 import { findMember } from "./members/store";
 import { parseWindow } from "./window";
 import { collectAll } from "./aggregator";
-import { buildPrompt, callGemini, callGroq, callOpenRouter, callAnthropic, parseOverrides } from "./copy";
+import {
+  buildPrompt,
+  callGemini,
+  callGroq,
+  callOpenRouter,
+  callAnthropic,
+  parseOverrides,
+} from "./copy";
 
 const [memberArg, windowArg] = process.argv.slice(2);
 if (!memberArg) {

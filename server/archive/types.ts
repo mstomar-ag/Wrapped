@@ -1,6 +1,14 @@
 import { WrappedData } from "../../src/data";
 
 export type ArchiveStatus = "queued" | "rendering" | "ready" | "failed";
+
+export type WrapPhase =
+  | "queued"
+  | "collecting"
+  | "copy"
+  | "aggregating"
+  | "rendering"
+  | "finishing";
 export type ArchiveSource = "ui" | "slack" | "scheduler" | "cli";
 
 export type ArchiveEntry = {
@@ -13,6 +21,10 @@ export type ArchiveEntry = {
   windowLabel: string; // human readable
   createdAt: string; // ISO
   status: ArchiveStatus;
+  /** 0–100 for UI progress bar */
+  progress?: number;
+  phase?: WrapPhase;
+  progressMessage?: string;
   source: ArchiveSource;
   triggeredBy?: string; // member id or slack user id
   postedToSlack: boolean;

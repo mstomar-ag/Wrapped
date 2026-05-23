@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { api, Member } from "../api";
+import { api, ArchiveEntry, Member } from "../api";
 import { DateRangePicker, RangeValue } from "../components/DateRangePicker";
+import { WrapProgress } from "../components/WrapProgress";
 
 export const Generate: React.FC = () => {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ export const Generate: React.FC = () => {
   const [range, setRange] = useState<RangeValue>({ kind: "preset", window: "last-week" });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [job, setJob] = useState<{ id: string; windowLabel?: string } | null>(null);
 
   useEffect(() => {
     api.listMembers().then((r) => {
@@ -27,8 +29,8 @@ export const Generate: React.FC = () => {
         range.kind === "custom"
           ? { member: selected, from: range.from, to: range.to }
           : { member: selected, window: range.window };
-      const { id } = await api.generate(body);
-      navigate(`/archive/${id}`);
+      const { id, windowLabel } = await api.generate(body);
+      setJob({ id, windowLabel });
     } catch (e) {
       setError((e as Error).message);
       setBusy(false);
@@ -36,6 +38,22 @@ export const Generate: React.FC = () => {
   };
 
   const member = members.find((m) => m.id === selected);
+
+  if (job && member) {
+    return (
+      <WrapProgress
+        entryId={job.id}
+        subjectName={member.name}
+        windowLabel={job.windowLabel}
+        onDone={(entry: ArchiveEntry) => navigate(`/archive/${entry.id}`)}
+        onFailed={(msg) => {
+          setError(msg);
+          setJob(null);
+          setBusy(false);
+        }}
+      />
+    );
+  }
 
   return (
     <>
@@ -62,8 +80,14 @@ export const Generate: React.FC = () => {
         {error && <div style={{ color: "var(--accent)" }}>{error}</div>}
 
         <div>
-          <button onClick={submit} disabled={busy || !selected}>
-            {busy ? <><span className="spinner" /> &nbsp;Queueing…</> : "Generate"}
+          <button type="button" onClick={submit} disabled={busy || !selected}>
+            {busy ? (
+              <>
+                <span className="spinner" /> &nbsp;Starting…
+              </>
+            ) : (
+              "Generate"
+            )}
           </button>
         </div>
       </div>

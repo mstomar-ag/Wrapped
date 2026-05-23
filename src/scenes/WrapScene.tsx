@@ -17,7 +17,9 @@ export const WrapScene: React.FC<{ data: WrappedData }> = ({ data }) => {
 
   return (
     <SceneBG palette={p} variant="blobs">
-      <AbsoluteFill style={{ padding: 90, color: p.fg, justifyContent: "center", alignItems: "center" }}>
+      <AbsoluteFill
+        style={{ padding: 90, color: p.fg, justifyContent: "center", alignItems: "center" }}
+      >
         <div
           style={{
             fontSize: 50,
@@ -71,7 +73,8 @@ export const WrapScene: React.FC<{ data: WrappedData }> = ({ data }) => {
             letterSpacing: -0.5,
             opacity: s3,
             transform: `translateY(${(1 - s3) * 30}px)`,
-          }}>
+          }}
+        >
           /wrapped {data.handle}
         </div>
 

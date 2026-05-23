@@ -8,11 +8,9 @@ import { collectEmail } from "./collectors/email";
 import { WrappedData } from "../src/data";
 import { DUMMY } from "../src/data";
 import { CopyOverrides } from "./copy";
+import { formatShortDate } from "./timezone";
 
-export const collectAll = async (
-  member: Member,
-  win: DateWindow,
-): Promise<AllSignals> => {
+export const collectAll = async (member: Member, win: DateWindow): Promise<AllSignals> => {
   const [slack, github, x, linkedin, email] = await Promise.allSettled([
     collectSlack(member, win),
     collectGitHub(member, win),
@@ -37,12 +35,8 @@ const fmtHour = (h: number) => {
   return `${hh} ${am ? "AM" : "PM"}`;
 };
 
-const fmtWeekLabel = (win: DateWindow) => {
-  const opts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" };
-  const a = win.start.toLocaleDateString("en-US", opts);
-  const b = win.end.toLocaleDateString("en-US", opts);
-  return `${a} – ${b}`;
-};
+const fmtWeekLabel = (win: DateWindow) =>
+  `${formatShortDate(win.start)} – ${formatShortDate(win.end)}`;
 
 export const buildWrappedData = (
   member: Member,
@@ -55,8 +49,7 @@ export const buildWrappedData = (
 
   const messages = slack?.messageCount ?? DUMMY.numbers.messages;
   const commits = gh?.commitCount ?? DUMMY.numbers.commits;
-  const linesChanged =
-    (gh?.additions ?? 0) + (gh?.deletions ?? 0) || DUMMY.numbers.linesChanged;
+  const linesChanged = (gh?.additions ?? 0) + (gh?.deletions ?? 0) || DUMMY.numbers.linesChanged;
 
   return {
     name: member.name,

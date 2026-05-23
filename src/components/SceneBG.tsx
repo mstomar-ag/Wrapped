@@ -81,11 +81,8 @@ export const useSceneIntro = (durationFrames: number) => {
   const enter = interpolate(frame, [0, 14], [0, 1], {
     extrapolateRight: "clamp",
   });
-  const exit = interpolate(
-    frame,
-    [durationFrames - 12, durationFrames],
-    [1, 0],
-    { extrapolateLeft: "clamp" },
-  );
+  const exit = interpolate(frame, [durationFrames - 12, durationFrames], [1, 0], {
+    extrapolateLeft: "clamp",
+  });
   return { enter, exit, both: Math.min(enter, exit) };
 };

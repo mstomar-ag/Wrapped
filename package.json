@@ -11,6 +11,8 @@
     "wrap": "tsx server/cli.ts",
     "member": "tsx server/members/cli.ts",
     "github:history": "tsx scripts/github-history.ts",
+    "slack:diag": "tsx scripts/slack-diag.ts",
+    "warm-cache": "tsx scripts/warm-cache.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src server",
     "lint:fix": "eslint src server --fix",

@@ -11,7 +11,12 @@ const shouldRender = rest.includes("--render");
 
 if (!memberArg) {
   console.error("usage: npm run wrap -- <member> [window] [--render]");
-  console.error("members:", listMembers().map((m) => m.id).join(", "));
+  console.error(
+    "members:",
+    listMembers()
+      .map((m) => m.id)
+      .join(", "),
+  );
   process.exit(1);
 }
 
@@ -22,7 +27,9 @@ if (!member) {
 }
 
 const win = parseWindow(windowArg);
-console.log(`collecting for ${member.name} from ${win.start.toISOString()} to ${win.end.toISOString()}`);
+console.log(
+  `collecting for ${member.name} from ${win.start.toISOString()} to ${win.end.toISOString()}`,
+);
 
 const signals = await collectAll(member, win);
 console.log("signals:", JSON.stringify(signals, null, 2));

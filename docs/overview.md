@@ -10,13 +10,13 @@
 
 Two main halves:
 
-| Layer | Role |
-|--------|------|
-| **`src/`** | Remotion composition: 9 scenes, themes, CC0 music (deterministic per handle), `WrappedData` type + `DUMMY` fallbacks |
-| **`server/`** | Hono API, collectors, aggregation, render pipeline, Slack verify/post, members store |
-| **`web/`** | Vite + React admin UI (generate, archive, members, schedule, channels) |
-| **`data/`** | File-backed JSON: members, archive, schedule, encrypted OAuth tokens |
-| **`out/cache/`** | MP4s keyed by hash of `WrappedData` |
+| Layer            | Role                                                                                                                 |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------- |
+| **`src/`**       | Remotion composition: 9 scenes, themes, CC0 music (deterministic per handle), `WrappedData` type + `DUMMY` fallbacks |
+| **`server/`**    | Hono API, collectors, aggregation, render pipeline, Slack verify/post, members store                                 |
+| **`web/`**       | Vite + React admin UI (generate, archive, members, schedule, channels)                                               |
+| **`data/`**      | File-backed JSON: members, archive, schedule, encrypted OAuth tokens                                                 |
+| **`out/cache/`** | MP4s keyed by hash of `WrappedData`                                                                                  |
 
 ```mermaid
 flowchart LR
@@ -73,14 +73,14 @@ Collectors that return `null` (missing creds) cause the aggregator to fall back 
 
 ## Data sources
 
-| Collector | Needs | Status in code |
-|-----------|--------|----------------|
-| Slack | `SLACK_BOT_TOKEN` | Implemented |
-| GitHub | `GITHUB_TOKEN` | Implemented |
-| X | `X_BEARER_TOKEN` | Implemented |
-| Linear / Notion | API keys | Implemented in `server/collectors/` |
-| LinkedIn / Email | Per-user OAuth | Stubs + `server/oauth/` |
-| Group wrap | Channel ID | `server/channels/` |
+| Collector        | Needs             | Status in code                      |
+| ---------------- | ----------------- | ----------------------------------- |
+| Slack            | `SLACK_BOT_TOKEN` | Implemented                         |
+| GitHub           | `GITHUB_TOKEN`    | Implemented                         |
+| X                | `X_BEARER_TOKEN`  | Implemented                         |
+| Linear / Notion  | API keys          | Implemented in `server/collectors/` |
+| LinkedIn / Email | Per-user OAuth    | Stubs + `server/oauth/`             |
+| Group wrap       | Channel ID        | `server/channels/`                  |
 
 ---
 
@@ -88,14 +88,14 @@ Collectors that return `null` (missing creds) cause the aggregator to fall back 
 
 Wrapped intentionally uses flat JSON on disk plus the filesystem for video output. No SQLite, no Postgres. Scale is small (~20 people, < 10 MB after a year), data is portable, deployment is just "mount a volume." See [ARCHITECTURE.md → No database](./ARCHITECTURE.md#no-database) for the migration plan when this stops scaling.
 
-| File / path | Purpose |
-|------|---------|
-| `data/members.json` | Member registry (Slack id, GitHub handle, optional socials). Written only via `server/members/store.ts`. |
-| `data/archive.json` | Record of every rendered wrap — UI, Slack, or scheduler. Newest first. |
-| `data/schedule.json` | Cron config for weekly wraps. |
-| `data/tokens.json` | Per-member OAuth tokens (encrypted, used by v2 LinkedIn/Gmail flows). |
-| `out/cache/<sha>.mp4` | Rendered video files, named by content hash for free dedupe. |
-| `wrapped_session` cookie | HS256-signed session JWT. **Stateless** — no server-side store. |
+| File / path              | Purpose                                                                                                  |
+| ------------------------ | -------------------------------------------------------------------------------------------------------- |
+| `data/members.json`      | Member registry (Slack id, GitHub handle, optional socials). Written only via `server/members/store.ts`. |
+| `data/archive.json`      | Record of every rendered wrap — UI, Slack, or scheduler. Newest first.                                   |
+| `data/schedule.json`     | Cron config for weekly wraps.                                                                            |
+| `data/tokens.json`       | Per-member OAuth tokens (encrypted, used by v2 LinkedIn/Gmail flows).                                    |
+| `out/cache/<sha>.mp4`    | Rendered video files, named by content hash for free dedupe.                                             |
+| `wrapped_session` cookie | HS256-signed session JWT. **Stateless** — no server-side store.                                          |
 
 **Both `data/` and `out/` must be mounted as persistent volumes** in any deployment. `data/` is metadata; `out/` is the actual videos. `out/cache/` can be ephemeral if you accept re-renders on demand.
 
@@ -121,13 +121,13 @@ The UI never auto-posts to Slack; the Slack slash command always does (to the ch
 
 ## Where to work
 
-| Task | Location |
-|------|----------|
-| New slide | `src/scenes/`, register in `Wrapped.tsx`; see `.claude/skills/design-reel-scene/` |
-| New signal | `server/collectors/foo.ts` → `types.ts` → `aggregator.ts` → maybe `WrappedData` |
-| Slack behavior | `server/index.ts`, `server/slack/` |
-| Finish product surface | Wire archive, scheduler, oauth, channels, static web into `server/index.ts` |
-| Local test render | `npm run wrap -- <member> last-week --render` |
+| Task                   | Location                                                                          |
+| ---------------------- | --------------------------------------------------------------------------------- |
+| New slide              | `src/scenes/`, register in `Wrapped.tsx`; see `.claude/skills/design-reel-scene/` |
+| New signal             | `server/collectors/foo.ts` → `types.ts` → `aggregator.ts` → maybe `WrappedData`   |
+| Slack behavior         | `server/index.ts`, `server/slack/`                                                |
+| Finish product surface | Wire archive, scheduler, oauth, channels, static web into `server/index.ts`       |
+| Local test render      | `npm run wrap -- <member> last-week --render`                                     |
 
 ---
 

@@ -18,14 +18,14 @@ Teammates only type `/wrapped @someone` in Slack. They never create tokens — y
 
 ## Prerequisites
 
-| Tool | Version / notes |
-|------|------------------|
-| **Node.js** | **22+** (matches `Dockerfile`) |
-| **npm** | Comes with Node |
-| **Git** | To clone the repo |
-| **Docker** | Optional — `make up` runs prod-like container locally |
+| Tool                   | Version / notes                                                    |
+| ---------------------- | ------------------------------------------------------------------ |
+| **Node.js**            | **22+** (matches `Dockerfile`)                                     |
+| **npm**                | Comes with Node                                                    |
+| **Git**                | To clone the repo                                                  |
+| **Docker**             | Optional — `make up` runs prod-like container locally              |
 | **ngrok** (or similar) | Required only if you want **Slack** `/wrapped` hitting your laptop |
-| **Railway CLI** | Optional until deploy — see [DEPLOY.md](./DEPLOY.md) |
+| **Railway CLI**        | Optional until deploy — see [DEPLOY.md](./DEPLOY.md)               |
 
 macOS: `brew install node@22` if needed.
 
@@ -71,28 +71,28 @@ Edit `.env` at the repo root. You can add keys **incrementally** — collectors 
 
 ### Minimum to get real Slack + GitHub data locally
 
-| Variable | Section below |
-|----------|----------------|
-| `SLACK_BOT_TOKEN` | [Slack](#3-slack-slack_bot_token--slack_signing_secret) |
+| Variable               | Section below                                           |
+| ---------------------- | ------------------------------------------------------- |
+| `SLACK_BOT_TOKEN`      | [Slack](#3-slack-slack_bot_token--slack_signing_secret) |
 | `SLACK_SIGNING_SECRET` | [Slack](#3-slack-slack_bot_token--slack_signing_secret) |
-| `GITHUB_TOKEN` | [GitHub](#4-github-github_token) |
+| `GITHUB_TOKEN`         | [GitHub](#4-github-github_token)                        |
 
 ### Recommended soon after
 
-| Variable | Purpose |
-|----------|---------|
-| `PUBLIC_BASE_URL` | `http://localhost:3000` locally; Railway URL in prod |
-| `GEMINI_API_KEY` or `OPENROUTER_API_KEY` or `ANTHROPIC_API_KEY` | Better week title / vibe copy (tries in that order) |
+| Variable                                                        | Purpose                                              |
+| --------------------------------------------------------------- | ---------------------------------------------------- |
+| `PUBLIC_BASE_URL`                                               | `http://localhost:3000` locally; Railway URL in prod |
+| `GEMINI_API_KEY` or `OPENROUTER_API_KEY` or `ANTHROPIC_API_KEY` | Better week title / vibe copy (tries in that order)  |
 
 ### Optional integrations
 
-| Variable | Purpose |
-|----------|---------|
-| `X_BEARER_TOKEN` | X/Twitter signals |
-| `LINEAR_API_KEY` | Linear ticket signals |
-| `NOTION_TOKEN` | Notion edit signals |
-| `LINKEDIN_*` / `GOOGLE_*` + `ENCRYPTION_KEY` | Per-user OAuth self-link |
-| `GITHUB_ORG` | Limit GitHub search to one org (e.g. `Agrim-Intelligence`) |
+| Variable                                     | Purpose                                                    |
+| -------------------------------------------- | ---------------------------------------------------------- |
+| `X_BEARER_TOKEN`                             | X/Twitter signals                                          |
+| `LINEAR_API_KEY`                             | Linear ticket signals                                      |
+| `NOTION_TOKEN`                               | Notion edit signals                                        |
+| `LINKEDIN_*` / `GOOGLE_*` + `ENCRYPTION_KEY` | Per-user OAuth self-link                                   |
+| `GITHUB_ORG`                                 | Limit GitHub search to one org (e.g. `Agrim-Intelligence`) |
 
 Full template: `.env.example`.
 
@@ -106,13 +106,13 @@ Wrapped stores **no database** — only files under `data/` and `out/`.
 mkdir -p data out/cache
 ```
 
-| File | Purpose | In git? |
-|------|---------|--------|
-| `data/members.json` | Who can be wrapped (Slack id, GitHub handle, email, …) | Often committed as a starter; prod lives on volume |
-| `data/archive.json` | Index of every wrap | Gitignored — starts as `[]` when missing |
-| `data/schedule.json` | Weekly cron config | Gitignored |
-| `data/tokens.json` | Encrypted OAuth tokens | Gitignored |
-| `out/cache/*.mp4` | Render output + cache | Gitignored |
+| File                 | Purpose                                                | In git?                                            |
+| -------------------- | ------------------------------------------------------ | -------------------------------------------------- |
+| `data/members.json`  | Who can be wrapped (Slack id, GitHub handle, email, …) | Often committed as a starter; prod lives on volume |
+| `data/archive.json`  | Index of every wrap                                    | Gitignored — starts as `[]` when missing           |
+| `data/schedule.json` | Weekly cron config                                     | Gitignored                                         |
+| `data/tokens.json`   | Encrypted OAuth tokens                                 | Gitignored                                         |
+| `out/cache/*.mp4`    | Render output + cache                                  | Gitignored                                         |
 
 The app **auto-creates** empty `archive.json` / `members.json` when a store first writes. For a fresh clone, seed members:
 
@@ -232,17 +232,17 @@ Without Slack, the server still runs; `/wrapped` in Slack will not work.
 
 **OAuth & Permissions** → **Bot Token Scopes** → add each:
 
-| Scope | Why |
-|-------|-----|
-| `channels:history` | Read public channel messages |
-| `channels:read` | List channels |
-| `users:read` | Profiles for auto-discovery |
-| `users:read.email` | Work email on profiles |
-| `reactions:read` | Top emoji slide (includes reactions you give) |
-| `search:read` | Fast message search (avoids scanning every channel) |
-| `chat:write` | Post status messages |
-| `files:write` | Upload MP4 |
-| `commands` | `/wrapped` slash command |
+| Scope              | Why                                                 |
+| ------------------ | --------------------------------------------------- |
+| `channels:history` | Read public channel messages                        |
+| `channels:read`    | List channels                                       |
+| `users:read`       | Profiles for auto-discovery                         |
+| `users:read.email` | Work email on profiles                              |
+| `reactions:read`   | Top emoji slide (includes reactions you give)       |
+| `search:read`      | Fast message search (avoids scanning every channel) |
+| `chat:write`       | Post status messages                                |
+| `files:write`      | Upload MP4                                          |
+| `commands`         | `/wrapped` slash command                            |
 
 Do **not** add `groups:history` / `im:history` unless you intentionally want private channels/DMs.
 
@@ -250,12 +250,12 @@ Do **not** add `groups:history` / `im:history` unless you intentionally want pri
 
 **Slash Commands** → **Create**:
 
-| Field | Value |
-|-------|--------|
-| Command | `/wrapped` |
-| Request URL | `https://<public-host>/api/slack/command` (see [§10 Slack + ngrok](#10-slack-slash-command-from-your-laptop-ngrok)) |
-| Short description | Generate a teammate's Wrapped reel |
-| Usage hint | `@teammate [last-week\|yesterday\|this-month]` |
+| Field             | Value                                                                                                               |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Command           | `/wrapped`                                                                                                          |
+| Request URL       | `https://<public-host>/api/slack/command` (see [§10 Slack + ngrok](#10-slack-slash-command-from-your-laptop-ngrok)) |
+| Short description | Generate a teammate's Wrapped reel                                                                                  |
+| Usage hint        | `@teammate [last-week\|yesterday\|this-month]`                                                                      |
 
 ### 6d. Install app → `SLACK_BOT_TOKEN`
 
@@ -334,9 +334,9 @@ Free tier is ~**100 reads/month** — fine for experiments, not heavy production
 
 The server tries providers **in order** and uses the first that works:
 
-1. `GEMINI_API_KEY` — https://aistudio.google.com/apikey  
-2. `OPENROUTER_API_KEY` — https://openrouter.ai/keys  
-3. `ANTHROPIC_API_KEY` — https://console.anthropic.com  
+1. `GEMINI_API_KEY` — https://aistudio.google.com/apikey
+2. `OPENROUTER_API_KEY` — https://openrouter.ai/keys
+3. `ANTHROPIC_API_KEY` — https://console.anthropic.com
 
 If none are set, copy falls back to simple heuristics. Cost with Haiku-scale models is negligible at team volume.
 
@@ -404,14 +404,14 @@ Full checklist: **[DEPLOY.md](./DEPLOY.md)**.
 
 ## What the bot can and can't see
 
-| Source | What's read | Auth |
-|--------|-------------|------|
-| Slack public channels | Messages, reactions, threads | Workspace bot token |
-| Slack private / DMs | Nothing by default | Extra scopes not enabled |
-| GitHub | Commits for linked usernames | PAT (+ org SSO) |
-| X | Public tweets for linked handles | Bearer token |
-| Linear / Notion | Optional, if keys set | Workspace tokens |
-| LinkedIn / personal Gmail | Nothing without per-user OAuth | Self-link flow |
+| Source                    | What's read                      | Auth                     |
+| ------------------------- | -------------------------------- | ------------------------ |
+| Slack public channels     | Messages, reactions, threads     | Workspace bot token      |
+| Slack private / DMs       | Nothing by default               | Extra scopes not enabled |
+| GitHub                    | Commits for linked usernames     | PAT (+ org SSO)          |
+| X                         | Public tweets for linked handles | Bearer token             |
+| Linear / Notion           | Optional, if keys set            | Workspace tokens         |
+| LinkedIn / personal Gmail | Nothing without per-user OAuth   | Self-link flow           |
 
 End users never paste tokens. Admins configure workspace credentials once.
 
@@ -419,17 +419,17 @@ End users never paste tokens. Admins configure workspace credentials once.
 
 ## Troubleshooting
 
-| Problem | Fix |
-|---------|-----|
-| `npm install` peer dependency errors | Use `npm install --legacy-peer-deps` |
-| `invalid signature` on Slack webhook | Wrong `SLACK_SIGNING_SECRET` or system clock skew |
-| Couldn't find / auto-discover user | `users:read` scope; run `npm run member -- sync-slack`; invite bot to channels |
-| GitHub **0 commits** | `repo` scope; **authorize PAT for org SSO**; correct `github` username on member |
-| Render fails / Chromium crash locally | Use `make up` (Docker has Chromium + shm); or install Chromium deps |
-| Render fails on Railway | Service RAM ≥ **1 GB** — see [DEPLOY.md](./DEPLOY.md) |
-| Video never posts to Slack | `files:write`; bot invited to channel |
-| Empty members in prod | Seed volume — [DEPLOY.md § Step 6](./DEPLOY.md#step-6--seed-data-on-the-volume) |
-| UI 404 on `/` | Run `make web-build` before `make dev` |
+| Problem                               | Fix                                                                              |
+| ------------------------------------- | -------------------------------------------------------------------------------- |
+| `npm install` peer dependency errors  | Use `npm install --legacy-peer-deps`                                             |
+| `invalid signature` on Slack webhook  | Wrong `SLACK_SIGNING_SECRET` or system clock skew                                |
+| Couldn't find / auto-discover user    | `users:read` scope; run `npm run member -- sync-slack`; invite bot to channels   |
+| GitHub **0 commits**                  | `repo` scope; **authorize PAT for org SSO**; correct `github` username on member |
+| Render fails / Chromium crash locally | Use `make up` (Docker has Chromium + shm); or install Chromium deps              |
+| Render fails on Railway               | Service RAM ≥ **1 GB** — see [DEPLOY.md](./DEPLOY.md)                            |
+| Video never posts to Slack            | `files:write`; bot invited to channel                                            |
+| Empty members in prod                 | Seed volume — [DEPLOY.md § Step 6](./DEPLOY.md#step-6--seed-data-on-the-volume)  |
+| UI 404 on `/`                         | Run `make web-build` before `make dev`                                           |
 
 ---
 

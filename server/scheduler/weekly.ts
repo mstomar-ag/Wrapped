@@ -17,7 +17,7 @@ export const startScheduler = () => {
   task = cron.schedule(
     cfg.cron,
     () => runWeekly().catch((e) => console.error("[scheduler] weekly run failed", e)),
-    cfg.timezone ? { timezone: cfg.timezone } : undefined,
+    { timezone: cfg.timezone ?? "Asia/Kolkata" },
   );
   console.log(`[scheduler] enabled: cron="${cfg.cron}" tz=${cfg.timezone ?? "(host)"}`);
 };

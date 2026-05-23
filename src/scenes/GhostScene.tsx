@@ -18,7 +18,9 @@ export const GhostScene: React.FC<{ data: WrappedData }> = ({ data }) => {
 
   return (
     <SceneBG palette={p} variant="blobs">
-      <AbsoluteFill style={{ padding: 90, color: p.fg, justifyContent: "center", alignItems: "center" }}>
+      <AbsoluteFill
+        style={{ padding: 90, color: p.fg, justifyContent: "center", alignItems: "center" }}
+      >
         <div
           style={{
             fontSize: 56,

@@ -45,8 +45,7 @@ export type RenderOptions = {
   outFile?: string;
 };
 
-const hashIndexPath = (hash: string) =>
-  path.join(ROOT, "out", "cache", ".by-hash", `${hash}.json`);
+const hashIndexPath = (hash: string) => path.join(ROOT, "out", "cache", ".by-hash", `${hash}.json`);
 
 const readHashIndex = async (hash: string): Promise<string | null> => {
   try {

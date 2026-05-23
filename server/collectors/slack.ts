@@ -1,5 +1,6 @@
 import { WebClient } from "@slack/web-api";
 import { Member } from "../members/types";
+import { calendarYmd, hourInAppTz, addCalendarDays } from "../timezone";
 import { DateWindow, SlackSignals } from "./types";
 
 let client: WebClient | null = null;
@@ -18,6 +19,23 @@ type RawMsg = {
   reactions?: { name: string; users?: string[] }[];
 };
 
+const tsInWindow = (ts: number, win: DateWindow): boolean => {
+  const ms = ts * 1000;
+  return ms >= win.start.getTime() && ms <= win.end.getTime();
+};
+
+const dedupeMessages = (msgs: RawMsg[]): RawMsg[] => {
+  const map = new Map<string, RawMsg>();
+  for (const m of msgs) {
+    map.set(`${m.channelName}:${m.ts}`, m);
+  }
+  return [...map.values()];
+};
+
+/** Slack search modifiers expect YYYY-MM-DD in the workspace calendar (IST). */
+const searchDate = (d: Date) => calendarYmd(d);
+const dayAfter = (d: Date) => addCalendarDays(calendarYmd(d), 1);
+
 export const collectSlack = async (
   member: Member,
   win: DateWindow,
@@ -29,10 +47,17 @@ export const collectSlack = async (
   const oldest = (win.start.getTime() / 1000).toString();
   const latest = (win.end.getTime() / 1000).toString();
 
-  const viaSearch = await collectViaSearch(slack, userId, win);
-  const messages =
-    viaSearch ??
-    (await collectViaChannelHistory(slack, userId, oldest, latest));
+  const [viaSearch, viaChannels] = await Promise.all([
+    collectViaSearch(slack, userId, win),
+    collectViaChannelHistory(slack, userId, oldest, latest, win),
+  ]);
+  const messages = dedupeMessages([...(viaSearch ?? []), ...viaChannels]).filter((m) =>
+    tsInWindow(m.ts, win),
+  );
+
+  console.log(
+    `[slack] ${member.id} search=${viaSearch?.length ?? "err"} channels=${viaChannels.length} merged=${messages.length}`,
+  );
 
   const sortedMsgs = messages.sort((a, b) => a.ts - b.ts);
   const nameCache = new Map<string, string>();
@@ -43,7 +68,7 @@ export const collectSlack = async (
   let reactionsGiven = 0;
 
   for (const m of sortedMsgs) {
-    const hour = new Date(m.ts * 1000).getHours();
+    const hour = hourInAppTz(new Date(m.ts * 1000));
     hourBuckets[hour]++;
     const emojis = m.text.match(/:[a-z0-9_+-]+:/gi) ?? [];
     for (const e of emojis) emojiCounts.set(e, (emojiCounts.get(e) ?? 0) + 1);
@@ -68,8 +93,7 @@ export const collectSlack = async (
     if (prior) prior.replies++;
     else threadCounts.set(key, { channel: m.channelName, replies: 1, title });
   }
-  const longestThread =
-    [...threadCounts.values()].sort((a, b) => b.replies - a.replies)[0] ?? null;
+  const longestThread = [...threadCounts.values()].sort((a, b) => b.replies - a.replies)[0] ?? null;
 
   return {
     messageCount: sortedMsgs.length,
@@ -88,19 +112,17 @@ export const collectSlack = async (
   };
 };
 
-/** One API call when `search:read` is on the bot — much faster than scanning every channel. */
+/** search:read — indexes thread replies; use YYYY-MM-DD in the query. */
 const collectViaSearch = async (
   slack: WebClient,
   userId: string,
   win: DateWindow,
 ): Promise<RawMsg[] | null> => {
   try {
-    const after = Math.floor(win.start.getTime() / 1000);
-    const before = Math.floor(win.end.getTime() / 1000);
-    const query = `from:<@${userId}> after:${after} before:${before}`;
+    const query = `from:<@${userId}> after:${searchDate(win.start)} before:${dayAfter(win.end)}`;
     const out: RawMsg[] = [];
     let page = 1;
-    while (page <= 5) {
+    while (page <= 10) {
       const res = await slack.search.messages({ query, count: 100, page, sort: "timestamp" });
       const batch = res.messages?.matches ?? [];
       if (!batch.length) break;
@@ -125,9 +147,54 @@ const collectViaSearch = async (
       page++;
     }
     return out;
-  } catch {
+  } catch (e) {
+    console.warn(`[slack] search unavailable: ${(e as Error).message}`);
     return null;
   }
+};
+
+const toRawMsg = (
+  m: {
+    text?: string;
+    ts?: string;
+    user?: string;
+    thread_ts?: string;
+    reactions?: { name?: string; users?: string[] }[];
+  },
+  channelName: string,
+): RawMsg => ({
+  text: m.text ?? "",
+  ts: parseFloat(m.ts ?? "0"),
+  channelName,
+  thread_ts: m.thread_ts,
+  reactions: m.reactions?.map((r) => ({ name: r.name ?? "", users: r.users })),
+});
+
+const fetchThreadUserMessages = async (
+  slack: WebClient,
+  channelId: string,
+  channelName: string,
+  threadTs: string,
+  userId: string,
+  win: DateWindow,
+): Promise<RawMsg[]> => {
+  const out: RawMsg[] = [];
+  let cursor: string | undefined;
+  do {
+    const res = await slack.conversations.replies({
+      channel: channelId,
+      ts: threadTs,
+      limit: 200,
+      cursor,
+    });
+    for (const m of res.messages ?? []) {
+      if (m.user !== userId) continue;
+      const raw = toRawMsg(m, channelName);
+      if (tsInWindow(raw.ts, win)) out.push(raw);
+    }
+    cursor = res.response_metadata?.next_cursor;
+  } while (cursor);
+  return out;
 };
 
 const collectViaChannelHistory = async (
@@ -135,15 +202,16 @@ const collectViaChannelHistory = async (
   userId: string,
   oldest: string,
   latest: string,
+  win: DateWindow,
 ): Promise<RawMsg[]> => {
   const channelsRes = await slack.conversations.list({
     exclude_archived: true,
-    types: "public_channel",
+    types: "public_channel,private_channel",
     limit: 200,
   });
   const channels = channelsRes.channels ?? [];
   const messages: RawMsg[] = [];
-  const concurrency = 8;
+  const concurrency = 6;
 
   for (let i = 0; i < channels.length; i += concurrency) {
     const batch = channels.slice(i, i + concurrency);
@@ -151,24 +219,41 @@ const collectViaChannelHistory = async (
       batch.map(async (ch) => {
         if (!ch.id) return;
         try {
-          const history = await slack.conversations.history({
-            channel: ch.id,
-            oldest,
-            latest,
-            limit: 200,
-          });
-          for (const m of history.messages ?? []) {
-            if (m.user !== userId) continue;
-            messages.push({
-              text: m.text ?? "",
-              ts: parseFloat(m.ts ?? "0"),
-              channelName: ch.name ?? ch.id,
-              thread_ts: m.thread_ts,
-              reactions: m.reactions?.map((r) => ({
-                name: r.name ?? "",
-                users: r.users,
-              })),
+          let cursor: string | undefined;
+          const threadsToScan = new Set<string>();
+          do {
+            const history = await slack.conversations.history({
+              channel: ch.id,
+              oldest,
+              latest,
+              limit: 200,
+              cursor,
             });
+            for (const m of history.messages ?? []) {
+              if (m.user === userId) {
+                messages.push(toRawMsg(m, ch.name ?? ch.id));
+              }
+              const replyCount = m.reply_count ?? 0;
+              if (replyCount > 0 && m.ts) {
+                threadsToScan.add(m.thread_ts ?? m.ts);
+              }
+              if (m.thread_ts && m.user === userId) {
+                threadsToScan.add(m.thread_ts);
+              }
+            }
+            cursor = history.response_metadata?.next_cursor;
+          } while (cursor);
+
+          for (const threadTs of threadsToScan) {
+            const replies = await fetchThreadUserMessages(
+              slack,
+              ch.id,
+              ch.name ?? ch.id,
+              threadTs,
+              userId,
+              win,
+            );
+            messages.push(...replies);
           }
         } catch {
           // channel not visible to bot
@@ -191,11 +276,7 @@ const resolveSlackText = async (
       try {
         const info = await slack.users.info({ user: id });
         const u = info.user;
-        const label =
-          u?.profile?.display_name ||
-          u?.real_name ||
-          u?.name ||
-          id;
+        const label = u?.profile?.display_name || u?.real_name || u?.name || id;
         cache.set(id, label);
       } catch {
         cache.set(id, id);
@@ -218,4 +299,28 @@ const computeGhostStreaks = (timestamps: number[]) => {
     if (gapHours > longest) longest = gapHours;
   }
   return { count, longestHours: Math.round(longest) };
+};
+
+/** Exported for diagnostics (`npm run slack:diag`). */
+export const countSlackMessages = async (
+  member: Member,
+  win: DateWindow,
+): Promise<{ search: number | null; channels: number; merged: number } | null> => {
+  const slack = getClient();
+  const userId = member.socials.slack?.userId;
+  if (!slack || !userId) return null;
+  const oldest = (win.start.getTime() / 1000).toString();
+  const latest = (win.end.getTime() / 1000).toString();
+  const [viaSearch, viaChannels] = await Promise.all([
+    collectViaSearch(slack, userId, win),
+    collectViaChannelHistory(slack, userId, oldest, latest, win),
+  ]);
+  const merged = dedupeMessages([...(viaSearch ?? []), ...viaChannels]).filter((m) =>
+    tsInWindow(m.ts, win),
+  );
+  return {
+    search: viaSearch?.length ?? null,
+    channels: viaChannels.length,
+    merged: merged.length,
+  };
 };

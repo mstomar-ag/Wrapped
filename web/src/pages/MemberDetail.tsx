@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { api, ArchiveEntry, Member } from "../api";
 import { StatusBadge } from "../components/StatusBadge";
+import { fmtDate, fmtDateTime, fmtRange } from "../format";
 
 export const MemberDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -28,7 +29,7 @@ export const MemberDetail: React.FC = () => {
       <h1 style={{ marginTop: 8 }}>{member.name}</h1>
       <p className="muted">
         {member.role ?? "Teammate"} · joined{" "}
-        {member.joinDate ? new Date(member.joinDate).toLocaleDateString() : "—"}
+        {member.joinDate ? fmtDate(member.joinDate) : "—"}
       </p>
 
       <h2>Handles</h2>
@@ -76,11 +77,8 @@ export const MemberDetail: React.FC = () => {
           <tbody>
             {history.map((e) => (
               <tr key={e.id}>
-                <td>
-                  {new Date(e.windowFrom).toLocaleDateString()} →{" "}
-                  {new Date(e.windowTo).toLocaleDateString()}
-                </td>
-                <td className="muted">{new Date(e.createdAt).toLocaleString()}</td>
+                <td>{e.windowLabel ?? fmtRange(e.windowFrom, e.windowTo)}</td>
+                <td className="muted">{fmtDateTime(e.createdAt)}</td>
                 <td>
                   <StatusBadge status={e.status} />
                 </td>

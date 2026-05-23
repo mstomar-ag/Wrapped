@@ -3,7 +3,10 @@ import { Member } from "./types";
 import { findMember, listMembers, upsertMember } from "./store";
 
 const slugify = (s: string) =>
-  s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "user";
+  s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "user";
 
 export type SlackSyncResult = {
   added: number;
@@ -40,8 +43,7 @@ export const syncMembersFromSlack = async (): Promise<SlackSyncResult> => {
       const name = u.profile?.real_name || u.real_name || slackHandle;
       const email = u.profile?.email;
 
-      const existing =
-        findMember(userId) ?? findMember(id) ?? findMember(slackHandle);
+      const existing = findMember(userId) ?? findMember(id) ?? findMember(slackHandle);
 
       const socials: Member["socials"] = {
         ...existing?.socials,

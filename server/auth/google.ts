@@ -108,7 +108,13 @@ export const startAuthFlow = (nextPath = "/"): { url: string } | null => {
 
 type TokenResp = { access_token?: string; id_token?: string };
 
-type GoogleProfile = { email?: string; email_verified?: boolean; name?: string; picture?: string; hd?: string };
+type GoogleProfile = {
+  email?: string;
+  email_verified?: boolean;
+  name?: string;
+  picture?: string;
+  hd?: string;
+};
 
 const decodeJwtPayload = (jwt: string): GoogleProfile | null => {
   try {
@@ -132,7 +138,8 @@ export const handleAuthCallback = async (
 
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  if (!clientId || !clientSecret) return { ok: false, error: "google sign-in not configured", status: 500 };
+  if (!clientId || !clientSecret)
+    return { ok: false, error: "google sign-in not configured", status: 500 };
 
   const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
@@ -152,7 +159,8 @@ export const handleAuthCallback = async (
   const tok = (await tokenRes.json()) as TokenResp;
   const profile = tok.id_token ? decodeJwtPayload(tok.id_token) : null;
   if (!profile?.email) return { ok: false, error: "no email from Google", status: 400 };
-  if (profile.email_verified === false) return { ok: false, error: "email not verified", status: 403 };
+  if (profile.email_verified === false)
+    return { ok: false, error: "email not verified", status: 403 };
 
   // Enforce domain server-side (UI hint via hd= is not authoritative)
   const email = profile.email.toLowerCase();
@@ -168,11 +176,7 @@ export const handleAuthCallback = async (
 };
 
 // ─── Middleware to gate /api/* (except a whitelist) ──────────────────────────
-const PUBLIC_API_PREFIXES = [
-  "/api/health",
-  "/api/auth",
-  "/api/slack/command",
-];
+const PUBLIC_API_PREFIXES = ["/api/health", "/api/auth", "/api/slack/command"];
 
 export const requireSignIn: MiddlewareHandler = async (c, next) => {
   const url = new URL(c.req.url);
