@@ -7,13 +7,18 @@ RUN npm run build
 
 FROM node:22-bookworm-slim
 
-# Chromium dependencies for Remotion's headless renderer + fonts
+# Chromium dependencies for Remotion's headless renderer + fonts.
+# fonts-noto-color-emoji is REQUIRED — without it, Chromium renders emoji as
+# empty rectangles ("tofu"), which breaks the EmojiScene and the peak-hour
+# slide's contextual emoji.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     chromium \
     libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libxkbcommon0 \
     libxcomposite1 libxdamage1 libxrandr2 libgbm1 libpango-1.0-0 \
-    libcairo2 libasound2 fonts-liberation \
+    libcairo2 libasound2 \
+    fonts-liberation fonts-noto-color-emoji fonts-noto-cjk fontconfig \
+  && fc-cache -f \
   && rm -rf /var/lib/apt/lists/*
 
 # Use the system chromium installed above (works on both arm64 and amd64).

@@ -2,13 +2,13 @@ import React from "react";
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { SceneBG } from "../components/SceneBG";
 import { springIn, countTo } from "../components/anim";
-import { PALETTES } from "../theme";
+import { usePalette } from "../themeRotation";
 import { WrappedData } from "../data";
 
 export const EmojiScene: React.FC<{ data: WrappedData }> = ({ data }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const p = PALETTES.lime;
+  const p = usePalette("emoji");
 
   const s = springIn(frame, fps, 0);
   const big = springIn(frame, fps, 6, { damping: 9, stiffness: 90 });

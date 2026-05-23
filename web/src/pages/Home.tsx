@@ -21,7 +21,7 @@ export const Home: React.FC = () => {
   const [members, setMembers] = useState<Member[]>([]);
 
   useEffect(() => {
-    api.listArchive({ limit: 20 }).then((r) => setRecent(dedupeRecent(r.entries).slice(0, 8)));
+    api.listArchive({ limit: 12 }).then((r) => setRecent(dedupeRecent(r.entries).slice(0, 6)));
     api.listMembers().then((r) => setMembers(r.members));
   }, []);
 
@@ -30,7 +30,7 @@ export const Home: React.FC = () => {
       <h1>Wrapped</h1>
       <p className="muted">A weekly highlight reel of your team&apos;s work, on demand.</p>
 
-      <div className="row" style={{ marginBottom: 32 }}>
+      <div className="row row-wrap" style={{ marginBottom: 32 }}>
         <Link to="/generate"><button>Generate a wrap</button></Link>
         <Link to="/channels"><button className="ghost">Wrap a channel</button></Link>
         <Link to="/members"><button className="ghost">Manage members</button></Link>
@@ -40,7 +40,7 @@ export const Home: React.FC = () => {
       {recent.length === 0 ? (
         <p className="muted">No wraps yet. Generate one to get started.</p>
       ) : (
-        <div className="grid grid-3">
+        <div className="recent-grid">
           {recent.map((e) => (
             <Link key={e.id} to={`/archive/${e.id}`} style={{ color: "inherit" }}>
               <div className="card" style={{ cursor: "pointer" }}>

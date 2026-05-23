@@ -51,7 +51,12 @@ export const buildWrappedData = (
   const commits = gh?.commitCount ?? DUMMY.numbers.commits;
   const linesChanged = (gh?.additions ?? 0) + (gh?.deletions ?? 0) || DUMMY.numbers.linesChanged;
 
+  // If there's no Slack activity to summarize, show a clear "—" rather than
+  // landing on midnight or leaking the dummy "11 PM".
+  const hasPeak = !!slack && slack.peakHour.messageCount > 0;
+
   return {
+    kind: "member",
     name: member.name,
     handle: `@${member.socials.slack?.handle ?? member.id}`,
     weekLabel: fmtWeekLabel(win),
@@ -59,8 +64,8 @@ export const buildWrappedData = (
     vibe: overrides.vibe ?? pickVibe(signals),
     numbers: { messages, commits, linesChanged },
     peakHour: {
-      hour: slack ? fmtHour(slack.peakHour.hour) : DUMMY.peakHour.hour,
-      messages: slack?.peakHour.messageCount ?? DUMMY.peakHour.messages,
+      hour: hasPeak ? fmtHour(slack!.peakHour.hour) : "—",
+      messages: hasPeak ? slack!.peakHour.messageCount : 0,
     },
     topEmoji: slack?.topEmoji
       ? {

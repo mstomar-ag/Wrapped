@@ -2,13 +2,13 @@ import React from "react";
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
 import { SceneBG } from "../components/SceneBG";
 import { springIn, fadeIn } from "../components/anim";
-import { PALETTES } from "../theme";
+import { usePalette } from "../themeRotation";
 import { WrappedData } from "../data";
 
 export const VibeScene: React.FC<{ data: WrappedData }> = ({ data }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const p = PALETTES.ocean;
+  const p = usePalette("vibe");
 
   const s = springIn(frame, fps, 0);
   const sQuote = springIn(frame, fps, 14);

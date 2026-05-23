@@ -2,13 +2,13 @@ import React from "react";
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { SceneBG } from "../components/SceneBG";
 import { springIn, countTo } from "../components/anim";
-import { PALETTES } from "../theme";
+import { usePalette } from "../themeRotation";
 import { WrappedData } from "../data";
 
 export const WeekendScene: React.FC<{ data: WrappedData }> = ({ data }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const p = PALETTES.tangerine;
+  const p = usePalette("weekend");
   const w = data.weekend;
   if (!w) return null;
 
@@ -94,7 +94,7 @@ export const WeekendScene: React.FC<{ data: WrappedData }> = ({ data }) => {
             padding: "16px 36px",
             borderRadius: 999,
             background: p.fg,
-            color: "#3a1f00",
+            color: p.onAccent,
             fontSize: 56,
             fontWeight: 900,
             letterSpacing: -1.5,

@@ -46,14 +46,12 @@ export const formatDateTime = (d: Date): string =>
     timeStyle: "short",
   }).format(d);
 
-/** Hour 0–23 in APP_TIMEZONE for a UTC instant. */
+/** Hour 0–23 in APP_TIMEZONE for a UTC instant.
+ * Uses explicit IST offset math (UTC+5:30, no DST) so we don't depend on
+ * Intl's locale-specific "1-24 vs 0-23" quirks. */
 export const hourInAppTz = (d: Date): number => {
-  const h = new Intl.DateTimeFormat("en-US", {
-    timeZone: APP_TIMEZONE,
-    hour: "numeric",
-    hour12: false,
-  }).format(d);
-  return h === "24" ? 0 : parseInt(h, 10);
+  const istMs = d.getTime() + 5.5 * 60 * 60 * 1000;
+  return new Date(istMs).getUTCHours();
 };
 
 export const SLACK_WRAP_ETA =

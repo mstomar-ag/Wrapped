@@ -98,6 +98,7 @@ Set in **Railway → Service → Variables** (or CLI). Minimum for Slack wraps:
 | `X_BEARER_TOKEN`, `LINEAR_API_KEY`, `NOTION_TOKEN`            | Optional                                           |
 | `ENCRYPTION_KEY`                                              | If using OAuth self-link                           |
 | `GITHUB_ORG`                                                  | Optional (`Agrim-Intelligence`)                    |
+| `RENDER_CONCURRENCY`                                          | Optional but recommended — see below               |
 
 ```bash
 # Example (run one at a time; never commit values)
@@ -106,6 +107,32 @@ railway variables set PUBLIC_BASE_URL=https://your-service.up.railway.app
 ```
 
 See `.env.example` for the full list.
+
+### Render concurrency on Railway
+
+Each rendered frame uses 1 Chromium worker; **each worker ≈ 150 MB** and saturates a vCPU during its slice. Default is `min(6, availableParallelism − 1)`. The code uses `os.availableParallelism()` which honors Railway's cgroup CPU cap, so it won't over-subscribe — but you can be explicit:
+
+| Service plan | Suggested `RENDER_CONCURRENCY` | Peak memory |
+|---|---|---|
+| Hobby (2 vCPU / shared) | `2` | ~400 MB |
+| Pro 4 vCPU | `3` | ~600 MB |
+| Pro 8 vCPU | `4`–`6` | ~1 GB |
+| Pro 16+ vCPU | `6` (cap) | ~1.2 GB |
+
+Higher is *not* always better — once you exceed available cores, frames stall waiting and total render time goes up. After deploy, watch the boot log:
+
+```
+[render] concurrency=4 (cores=4) → /app/out/cache/...mp4
+```
+
+If you see `cores=14` on a 2 vCPU service, the cgroup limit isn't being detected — set `RENDER_CONCURRENCY=2` explicitly.
+
+### Other Railway-specific notes
+
+- **Memory cap**: a single render peaks at `concurrency × ~150 MB`. Make sure Service Settings → Memory is at least 1 GB (Hobby) / 2 GB (Pro) above that to leave room for Slack/GitHub fetches, the bundle, and OS.
+- **First-render cold start**: ~5–10 s extra on the first render of a deploy (Remotion bundles `src/Wrapped.tsx`). Subsequent renders in the same process reuse the cached bundle.
+- **No `/dev/shm` tuning**: Railway containers have enough by default, unlike Docker on macOS. The `--shm-size=1g` flag is for local Docker only.
+- **CPU billing**: Railway bills CPU-seconds. A 2-minute render at concurrency=4 ≈ 8 vCPU-seconds. For a 20-person team running ~50 wraps/month, that's roughly $0.02/month in CPU — render cost is essentially free; Slack/GitHub API quotas are the real watch-out.
 
 ## 7. Slack slash command URL
 

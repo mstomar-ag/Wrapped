@@ -2,13 +2,13 @@ import React from "react";
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
 import { SceneBG } from "../components/SceneBG";
 import { springIn, countTo } from "../components/anim";
-import { PALETTES } from "../theme";
+import { usePalette } from "../themeRotation";
 import { WrappedData } from "../data";
 
 export const ThreadScene: React.FC<{ data: WrappedData }> = ({ data }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const p = PALETTES.tangerine;
+  const p = usePalette("thread");
 
   const s = springIn(frame, fps, 0);
   const replies = countTo(frame, 10, 30, data.thread.replies);

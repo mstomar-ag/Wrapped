@@ -26,7 +26,7 @@ export const Members: React.FC = () => {
 
   return (
     <>
-      <div className="row" style={{ justifyContent: "space-between" }}>
+      <div className="row row-wrap" style={{ justifyContent: "space-between" }}>
         <h1>Members</h1>
         <button onClick={() => setAdding(true)}>Add member</button>
       </div>
@@ -85,33 +85,53 @@ export const Members: React.FC = () => {
       )}
 
       <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Role</th>
-              <th>Slack</th>
-              <th>GitHub</th>
-              <th>Email</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {members.map((m) => (
-              <tr key={m.id}>
-                <td><Link to={`/members/${m.id}`}>{m.name}</Link></td>
-                <td className="muted">{m.role ?? "—"}</td>
-                <td className="muted">{m.socials.slack?.handle ?? "—"}</td>
-                <td className="muted">{m.socials.github?.username ?? "—"}</td>
-                <td className="muted">{m.socials.email ?? "—"}</td>
-                <td><Link to={`/members/${m.id}`}><button className="ghost">Open</button></Link></td>
+        <div className="table-scroll">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Role</th>
+                <th>Slack</th>
+                <th>GitHub</th>
+                <th>Email</th>
+                <th></th>
               </tr>
-            ))}
-            {members.length === 0 && (
-              <tr><td colSpan={6} className="muted" style={{ padding: 40, textAlign: "center" }}>No members. Add one to begin.</td></tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {members.map((m) => (
+                <tr key={m.id}>
+                  <td data-label="Name">
+                    <Link to={`/members/${m.id}`}>{m.name}</Link>
+                  </td>
+                  <td className="muted" data-label="Role">
+                    {m.role ?? "—"}
+                  </td>
+                  <td className="muted" data-label="Slack">
+                    {m.socials.slack?.handle ?? "—"}
+                  </td>
+                  <td className="muted" data-label="GitHub">
+                    {m.socials.github?.username ?? "—"}
+                  </td>
+                  <td className="muted" data-label="Email">
+                    {m.socials.email ?? "—"}
+                  </td>
+                  <td className="td-actions" data-label="">
+                    <Link to={`/members/${m.id}`}>
+                      <button className="ghost">Open</button>
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+              {members.length === 0 && (
+                <tr className="table-empty">
+                  <td colSpan={6} className="muted">
+                    No members. Add one to begin.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </>
   );

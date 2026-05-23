@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { api } from "../api";
+import { api, ArchiveEntry } from "../api";
 import { DateRangePicker, RangeValue } from "../components/DateRangePicker";
+import { WrapProgress } from "../components/WrapProgress";
 
 export const Channels: React.FC = () => {
   const navigate = useNavigate();
-  const [channel, setChannel] = useState("");
+  const [channel, setChannel] = useState<string>("");
   const [range, setRange] = useState<RangeValue>({ kind: "preset", window: "last-week" });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [job, setJob] = useState<{ id: string; windowLabel?: string } | null>(null);
 
   const submit = async () => {
     if (!channel.trim()) return;
@@ -19,21 +21,37 @@ export const Channels: React.FC = () => {
         range.kind === "custom"
           ? { channel: channel.trim(), from: range.from, to: range.to }
           : { channel: channel.trim(), window: range.window };
-      const { id } = await api.channelWrap(body);
-      navigate(`/archive/${id}`);
+      const res = await api.channelWrap(body);
+      setJob({ id: res.id, windowLabel: (res as { windowLabel?: string }).windowLabel });
     } catch (e) {
       setError((e as Error).message);
       setBusy(false);
     }
   };
 
+  if (job) {
+    return (
+      <WrapProgress
+        entryId={job.id}
+        subjectName={`#${channel.replace(/^#/, "")}`}
+        windowLabel={job.windowLabel}
+        onDone={(entry: ArchiveEntry) => navigate(`/archive/${entry.id}`)}
+        onFailed={(msg) => {
+          setError(msg);
+          setJob(null);
+          setBusy(false);
+        }}
+      />
+    );
+  }
+
   return (
     <>
       <h1>Wrap a channel</h1>
       <p className="muted">
-        Generate a reel for an entire Slack channel — top posters, busiest hours, biggest thread.
-        Channel posts <strong>only happen via Slack slash command</strong>; wraps generated here stay
-        in the centralized archive.
+        Pick a Slack channel and a time range. We summarize the channel's chatter —
+        top posters, busiest hours, biggest thread. (No GitHub data — channels are
+        Slack-only.)
       </p>
 
       <div className="grid" style={{ gap: 20, maxWidth: 640 }}>
@@ -46,8 +64,8 @@ export const Channels: React.FC = () => {
             style={{ width: "100%" }}
           />
           <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>
-            Channel <strong>name</strong> (with or without <code>#</code>), or paste the channel ID if
-            you have it. The bot must be a member of the channel.
+            Channel name (with or without the <code>#</code>). The bot must already be a
+            member of the channel. Paste a channel ID (<code>C…</code>) if you have one.
           </p>
         </div>
 
@@ -59,10 +77,10 @@ export const Channels: React.FC = () => {
         {error && <div style={{ color: "var(--accent)" }}>{error}</div>}
 
         <div>
-          <button onClick={submit} disabled={busy || !channel.trim()}>
+          <button type="button" onClick={submit} disabled={busy || !channel.trim()}>
             {busy ? (
               <>
-                <span className="spinner" /> &nbsp; Queueing…
+                <span className="spinner" /> &nbsp;Starting…
               </>
             ) : (
               "Generate"

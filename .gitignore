@@ -13,3 +13,5 @@ data/archive.json
 data/schedule.json
 
 wrapped-google-internal-signin.json
+
+.DS_Store

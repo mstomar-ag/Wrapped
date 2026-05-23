@@ -1,4 +1,9 @@
+/** Which kind of wrap this is — drives scene selection (channels skip commit slide etc.) */
+export type WrappedKind = "member" | "channel";
+
 export type WrappedData = {
+  /** Defaults to "member" if omitted (backward-compat). */
+  kind?: WrappedKind;
   name: string;
   handle: string;
   weekLabel: string;
@@ -48,8 +53,10 @@ export const DUMMY: WrappedData = {
     linesChanged: 8421,
   },
   peakHour: {
-    hour: "11 PM",
-    messages: 64,
+    // Used only when the Slack collector is unreachable. Picked to look
+    // plausible rather than memorable — "11 PM" everywhere was misread as a bug.
+    hour: "—",
+    messages: 0,
   },
   topEmoji: {
     emoji: "🚀",

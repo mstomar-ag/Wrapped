@@ -34,7 +34,7 @@ export const MemberDetail: React.FC = () => {
 
       <h2>Handles</h2>
       <div className="card" style={{ padding: 16 }}>
-        <table>
+        <table className="kv-table">
           <tbody>
             <tr>
               <th>Slack</th>
@@ -65,39 +65,43 @@ export const MemberDetail: React.FC = () => {
 
       <h2>Wrap history</h2>
       <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-        <table>
-          <thead>
-            <tr>
-              <th>Range</th>
-              <th>Created</th>
-              <th>Status</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {history.map((e) => (
-              <tr key={e.id}>
-                <td>{e.windowLabel ?? fmtRange(e.windowFrom, e.windowTo)}</td>
-                <td className="muted">{fmtDateTime(e.createdAt)}</td>
-                <td>
-                  <StatusBadge status={e.status} />
-                </td>
-                <td>
-                  <Link to={`/archive/${e.id}`}>
-                    <button className="ghost">Open</button>
-                  </Link>
-                </td>
-              </tr>
-            ))}
-            {history.length === 0 && (
+        <div className="table-scroll">
+          <table className="data-table">
+            <thead>
               <tr>
-                <td colSpan={4} className="muted" style={{ padding: 30, textAlign: "center" }}>
-                  No wraps yet.
-                </td>
+                <th>Range</th>
+                <th>Created</th>
+                <th>Status</th>
+                <th></th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {history.map((e) => (
+                <tr key={e.id}>
+                  <td data-label="Range">{e.windowLabel ?? fmtRange(e.windowFrom, e.windowTo)}</td>
+                  <td className="muted" data-label="Created">
+                    {fmtDateTime(e.createdAt)}
+                  </td>
+                  <td data-label="Status">
+                    <StatusBadge status={e.status} />
+                  </td>
+                  <td className="td-actions" data-label="">
+                    <Link to={`/archive/${e.id}`}>
+                      <button className="ghost">Open</button>
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+              {history.length === 0 && (
+                <tr className="table-empty">
+                  <td colSpan={4} className="muted">
+                    No wraps yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </>
   );

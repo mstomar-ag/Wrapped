@@ -33,6 +33,7 @@ export const Layout: React.FC = () => {
         </nav>
         {auth?.authenticated && (
           <div
+            className="sidebar-user"
             style={{
               position: "absolute",
               bottom: 20,

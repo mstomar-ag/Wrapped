@@ -42,40 +42,56 @@ export const Archive: React.FC = () => {
       </div>
 
       <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-        <table>
-          <thead>
-            <tr>
-              <th>Subject</th>
-              <th>Range</th>
-              <th>Created</th>
-              <th>Status</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {entries.map((e) => (
-              <tr key={e.id}>
-                <td>
-                  <Link to={`/archive/${e.id}`}>{e.subjectName}</Link>
-                </td>
-                <td className="muted">
-                  {e.windowLabel ?? fmtRange(e.windowFrom, e.windowTo)}
-                </td>
-                <td className="muted">{fmtDateTime(e.createdAt)}</td>
-                <td>
-                  <StatusBadge status={e.status} />
-                  {e.status === "ready" && e.hasVideo === false && (
-                    <span className="muted" style={{ fontSize: 11, marginLeft: 6 }}>no file</span>
-                  )}
-                </td>
-                <td><button className="ghost" onClick={() => del(e.id)}>Delete</button></td>
+        <div className="table-scroll">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Subject</th>
+                <th>Range</th>
+                <th>Created</th>
+                <th>Status</th>
+                <th></th>
               </tr>
-            ))}
-            {entries.length === 0 && (
-              <tr><td colSpan={5} className="muted" style={{ padding: 40, textAlign: "center" }}>No wraps yet.</td></tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {entries.map((e) => (
+                <tr key={e.id}>
+                  <td data-label="Subject">
+                    <Link to={`/archive/${e.id}`}>{e.subjectName}</Link>
+                  </td>
+                  <td className="muted" data-label="Range">
+                    {e.windowLabel ?? fmtRange(e.windowFrom, e.windowTo)}
+                  </td>
+                  <td className="muted" data-label="Created">
+                    {fmtDateTime(e.createdAt)}
+                  </td>
+                  <td data-label="Status">
+                    <span>
+                      <StatusBadge status={e.status} />
+                      {e.status === "ready" && e.hasVideo === false && (
+                        <span className="muted" style={{ fontSize: 11, marginLeft: 6 }}>
+                          no file
+                        </span>
+                      )}
+                    </span>
+                  </td>
+                  <td className="td-actions" data-label="">
+                    <button className="ghost" onClick={() => del(e.id)}>
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {entries.length === 0 && (
+                <tr className="table-empty">
+                  <td colSpan={5} className="muted">
+                    No wraps yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </>
   );

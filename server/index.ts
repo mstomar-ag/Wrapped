@@ -20,7 +20,12 @@ import { collectAll, buildWrappedData } from "./aggregator";
 import { generateCopy } from "./copy";
 import { verifySlackSignature } from "./slack/verify";
 import { respondToSlashCommand } from "./slack/post";
-import { startWrapForMember, runWrapForMember, runWrapForChannel } from "./wrap-runner";
+import {
+  startWrapForMember,
+  startWrapForChannel,
+  runWrapForMember,
+  runWrapForChannel,
+} from "./wrap-runner";
 import { resolveChannel } from "./channels/lookup";
 import { listEntries, getEntry, deleteEntry } from "./archive/store";
 import { toPublicArchiveEntry } from "./archive/public";
@@ -234,14 +239,14 @@ app.post("/api/channels/wrap", async (c) => {
   }
 
   const session = getSession(c);
-  const entry = await runWrapForChannel({
+  const entry = startWrapForChannel({
     channel: body.channel,
     win,
     source: "ui",
     triggeredBy: session?.email,
-    post: null,
+    post: null, // UI never auto-posts to Slack
   });
-  return c.json({ id: entry.id });
+  return c.json({ id: entry.id, windowLabel: entry.windowLabel });
 });
 
 app.get("/api/channels/resolve/:name", async (c) => {
@@ -291,26 +296,35 @@ app.post("/api/schedule/run-now", () => {
 });
 
 // ─── Slack slash command ─────────────────────────────────────────────────────
-const HELP_TEXT = [
-  "*Wrapped — slash command help*",
-  "",
-  "Usage:",
-  "• `/wrapped @user` — last week (default)",
-  "• `/wrapped @user yesterday` | `today` | `last-week` | `last-month` | `last-quarter` | `all-time`",
-  "• `/wrapped @user since-2024-01-15` — everything since that date",
-  "• `/wrapped @user since-joined` — since their join date (must be set)",
-  "• `/wrapped @user 2024-01-15..2024-06-01` — explicit range",
-  "• `/wrapped #channel-name [window]` — wrap a whole channel",
-  "• `/wrapped link @user github <handle>` — admin: fix an auto-discovered handle",
-  "• `/wrapped help` — show this message",
-  "",
-  "Estimated time:",
-  "• Last-week reel: ~25-45s",
-  "• Last-month: ~60s",
-  "• Last-quarter / all-time: ~90-180s",
-  "",
-  "Every reel is also saved to the centralized archive (visible to everyone in the workspace).",
-].join("\n");
+const publicBaseUrl = (): string => {
+  const raw = process.env.PUBLIC_BASE_URL?.trim() || "http://localhost:3000";
+  return raw.replace(/\/$/, "");
+};
+
+const slackHelpText = (): string => {
+  const base = publicBaseUrl();
+  return [
+    "*Wrapped — slash command help*",
+    "",
+    "Usage:",
+    "• `/wrapped @user` — last week (default)",
+    "• `/wrapped @user yesterday` | `today` | `last-week` | `last-month` | `last-quarter` | `all-time`",
+    "• `/wrapped @user since-2024-01-15` — everything since that date",
+    "• `/wrapped @user since-joined` — since their join date (must be set)",
+    "• `/wrapped @user 2024-01-15..2024-06-01` — explicit range",
+    "• `/wrapped #channel-name [window]` — wrap a whole channel",
+    "• `/wrapped link @user github <handle>` — admin: fix an auto-discovered handle",
+    "• `/wrapped dashboard` — link to the web dashboard",
+    "• `/wrapped help` — show this message",
+    "",
+    `*Dashboard:* <${base}|${base}>`,
+    "",
+    "Estimated time:",
+    `• ${SLACK_WRAP_ETA}`,
+    "",
+    "Every reel is also saved to the centralized archive (visible in the dashboard).",
+  ].join("\n");
+};
 
 app.post("/api/slack/command", async (c) => {
   const raw = await c.req.text();
@@ -331,7 +345,16 @@ app.post("/api/slack/command", async (c) => {
 
   // /wrapped help
   if (tokens[0] === "help" || tokens.length === 0) {
-    return c.json({ response_type: "ephemeral", text: HELP_TEXT });
+    return c.json({ response_type: "ephemeral", text: slackHelpText() });
+  }
+
+  // /wrapped dashboard
+  if (tokens[0] === "dashboard") {
+    const base = publicBaseUrl();
+    return c.json({
+      response_type: "ephemeral",
+      text: `*Wrapped dashboard*\n<${base}|Open dashboard> — generate wraps, browse the archive, manage members.`,
+    });
   }
 
   // /wrapped link @user github <handle>

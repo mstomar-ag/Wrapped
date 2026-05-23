@@ -47,16 +47,17 @@ export const collectSlack = async (
   const oldest = (win.start.getTime() / 1000).toString();
   const latest = (win.end.getTime() / 1000).toString();
 
-  const [viaSearch, viaChannels] = await Promise.all([
+  const [viaSearch, viaChannels, reactionItems] = await Promise.all([
     collectViaSearch(slack, userId, win),
     collectViaChannelHistory(slack, userId, oldest, latest, win),
+    collectReactionsGiven(slack, userId, win),
   ]);
   const messages = dedupeMessages([...(viaSearch ?? []), ...viaChannels]).filter((m) =>
     tsInWindow(m.ts, win),
   );
 
   console.log(
-    `[slack] ${member.id} search=${viaSearch?.length ?? "err"} channels=${viaChannels.length} merged=${messages.length}`,
+    `[slack] ${member.id} search=${viaSearch?.length ?? "err"} channels=${viaChannels.length} merged=${messages.length} reactionsGiven=${reactionItems.length}`,
   );
 
   const sortedMsgs = messages.sort((a, b) => a.ts - b.ts);
@@ -65,20 +66,23 @@ export const collectSlack = async (
 
   const emojiCounts = new Map<string, number>();
   const hourBuckets = new Array(24).fill(0);
+
+  // Reactions the user gave anywhere in the workspace (including on others' messages).
+  // reactions.list returns the items the user reacted to, with the user's own reactions on each.
   let reactionsGiven = 0;
+  for (const item of reactionItems) {
+    for (const r of item.reactions) {
+      emojiCounts.set(`:${r.name}:`, (emojiCounts.get(`:${r.name}:`) ?? 0) + 1);
+      reactionsGiven++;
+    }
+  }
 
   for (const m of sortedMsgs) {
     const hour = hourInAppTz(new Date(m.ts * 1000));
     hourBuckets[hour]++;
+    // Shortcode emojis the user typed in their own messages
     const emojis = m.text.match(/:[a-z0-9_+-]+:/gi) ?? [];
     for (const e of emojis) emojiCounts.set(e, (emojiCounts.get(e) ?? 0) + 1);
-    for (const r of m.reactions ?? []) {
-      const key = `:${r.name}:`;
-      if ((r.users ?? []).includes(userId)) {
-        reactionsGiven++;
-        emojiCounts.set(key, (emojiCounts.get(key) ?? 0) + 1);
-      }
-    }
   }
 
   const ghostStreaks = computeGhostStreaks(sortedMsgs.map((m) => m.ts));
@@ -129,11 +133,15 @@ const collectViaSearch = async (
       for (const m of batch) {
         const ts = parseFloat(m.ts ?? "0");
         const row = m as {
+          subtype?: string;
           thread_ts?: string;
           reactions?: { name?: string; users?: string[] }[];
         };
+        if (row.subtype) continue;
+        const text = m.text ?? "";
+        if (/^<@[A-Z0-9]+> has (joined|left) the channel$/i.test(text)) continue;
         out.push({
-          text: m.text ?? "",
+          text,
           ts,
           channelName: m.channel?.name ?? "unknown",
           thread_ts: row.thread_ts,
@@ -153,22 +161,31 @@ const collectViaSearch = async (
   }
 };
 
+// Returns null for Slack system messages — channel_join, channel_leave,
+// bot_message, pinned_item, etc. Real user posts have no subtype.
 const toRawMsg = (
   m: {
     text?: string;
     ts?: string;
     user?: string;
+    subtype?: string;
     thread_ts?: string;
     reactions?: { name?: string; users?: string[] }[];
   },
   channelName: string,
-): RawMsg => ({
-  text: m.text ?? "",
-  ts: parseFloat(m.ts ?? "0"),
-  channelName,
-  thread_ts: m.thread_ts,
-  reactions: m.reactions?.map((r) => ({ name: r.name ?? "", users: r.users })),
-});
+): RawMsg | null => {
+  if (m.subtype) return null;
+  // Defensive: even if subtype is missing, drop the canonical "has joined the
+  // channel" sentence text in case some workspaces emit it without a subtype.
+  if (/^<@[A-Z0-9]+> has (joined|left) the channel$/i.test(m.text ?? "")) return null;
+  return {
+    text: m.text ?? "",
+    ts: parseFloat(m.ts ?? "0"),
+    channelName,
+    thread_ts: m.thread_ts,
+    reactions: m.reactions?.map((r) => ({ name: r.name ?? "", users: r.users })),
+  };
+};
 
 const fetchThreadUserMessages = async (
   slack: WebClient,
@@ -190,7 +207,7 @@ const fetchThreadUserMessages = async (
     for (const m of res.messages ?? []) {
       if (m.user !== userId) continue;
       const raw = toRawMsg(m, channelName);
-      if (tsInWindow(raw.ts, win)) out.push(raw);
+      if (raw && tsInWindow(raw.ts, win)) out.push(raw);
     }
     cursor = res.response_metadata?.next_cursor;
   } while (cursor);
@@ -231,7 +248,8 @@ const collectViaChannelHistory = async (
             });
             for (const m of history.messages ?? []) {
               if (m.user === userId) {
-                messages.push(toRawMsg(m, ch.name ?? ch.id));
+                const raw = toRawMsg(m, ch.name ?? ch.id);
+                if (raw) messages.push(raw);
               }
               const replyCount = m.reply_count ?? 0;
               if (replyCount > 0 && m.ts) {
@@ -286,6 +304,48 @@ const resolveSlackText = async (
   }
   out = out.replace(/<#[A-Z0-9]+\|([^>]+)>/g, "#$1");
   out = out.replace(/<#([A-Z0-9]+)>/g, "#channel");
+  return out;
+};
+
+// Reactions THIS user has given across the workspace. Each item is a message
+// the user reacted to, with one or more reactions of theirs on it. We sum.
+type ReactionsItem = { reactions: { name: string; count: number }[] };
+
+const collectReactionsGiven = async (
+  slack: WebClient,
+  userId: string,
+  win: DateWindow,
+): Promise<ReactionsItem[]> => {
+  const out: ReactionsItem[] = [];
+  try {
+    let cursor: string | undefined;
+    let page = 0;
+    do {
+      const res: {
+        items?: Array<{
+          message?: { ts?: string; reactions?: { name?: string; users?: string[]; count?: number }[] };
+        }>;
+        response_metadata?: { next_cursor?: string };
+      } = await slack.reactions.list({
+        user: userId,
+        count: 100,
+        cursor,
+        full: true,
+      });
+      for (const it of res.items ?? []) {
+        const ts = parseFloat(it.message?.ts ?? "0");
+        if (!tsInWindow(ts, win)) continue;
+        const mine = (it.message?.reactions ?? [])
+          .filter((r) => r.name && (r.users ?? []).includes(userId))
+          .map((r) => ({ name: r.name!, count: 1 })); // each row = 1 reaction from this user
+        if (mine.length) out.push({ reactions: mine });
+      }
+      cursor = res.response_metadata?.next_cursor;
+      if (++page > 25) break; // hard cap; 25 pages × 100 ≈ 2500 reactions
+    } while (cursor);
+  } catch (e) {
+    console.warn(`[slack] reactions.list unavailable: ${(e as Error).message}`);
+  }
   return out;
 };
 

@@ -75,7 +75,7 @@ export const api = {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(body),
-    }).then((r) => json<{ id: string }>(r)),
+    }).then((r) => json<{ id: string; windowLabel?: string }>(r)),
 
   listMembers: () => fetch("/api/members").then((r) => json<{ members: Member[] }>(r)),
   getMember: (id: string) => fetch(`/api/members/${id}`).then((r) => json<Member>(r)),

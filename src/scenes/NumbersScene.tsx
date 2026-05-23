@@ -2,18 +2,58 @@ import React from "react";
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
 import { SceneBG } from "../components/SceneBG";
 import { springIn, countTo } from "../components/anim";
-import { PALETTES } from "../theme";
+import { usePalette } from "../themeRotation";
 import { WrappedData } from "../data";
+
+type RowSpec = {
+  label: string;
+  target: number;
+  color: string;
+  highlight?: boolean;
+};
 
 export const NumbersScene: React.FC<{ data: WrappedData }> = ({ data }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const p = PALETTES.purple;
+  const p = usePalette("numbers");
 
   const s = springIn(frame, fps, 0);
-  const messages = countTo(frame, 8, 35, data.numbers.messages);
-  const commits = countTo(frame, 22, 35, data.numbers.commits);
-  const lines = countTo(frame, 36, 40, data.numbers.linesChanged);
+  const isChannel = data.kind === "channel";
+
+  // Channel wraps repurpose the numeric slots (see channels/build.ts):
+  //   numbers.commits      → uniquePosters
+  //   numbers.linesChanged → longestThread.replies
+  // Labels need to reflect that so viewers don't read "5 commits" on a
+  // channel reel and think the channel pushed code.
+  const allRows: RowSpec[] = isChannel
+    ? [
+        { label: "messages", target: data.numbers.messages, color: p.fg },
+        {
+          label: "unique posters",
+          target: data.numbers.commits,
+          color: p.accent,
+          highlight: true,
+        },
+        {
+          label: "longest thread (replies)",
+          target: data.numbers.linesChanged,
+          color: p.fg,
+        },
+      ]
+    : [
+        { label: "messages sent", target: data.numbers.messages, color: p.fg },
+        {
+          label: "commits pushed",
+          target: data.numbers.commits,
+          color: p.accent,
+          highlight: true,
+        },
+        { label: "lines changed", target: data.numbers.linesChanged, color: p.fg },
+      ];
+
+  // Drop zero rows so a channel without threaded replies doesn't show "0 longest thread".
+  const rows = allRows.filter((r) => r.target > 0);
+  const delays = [6, 18, 32];
 
   return (
     <SceneBG palette={p} variant="blobs">
@@ -31,31 +71,18 @@ export const NumbersScene: React.FC<{ data: WrappedData }> = ({ data }) => {
           BY THE NUMBERS
         </div>
 
-        <Row
-          label="messages sent"
-          value={messages.toLocaleString()}
-          color={p.fg}
-          delay={6}
-          fps={fps}
-          frame={frame}
-        />
-        <Row
-          label="commits pushed"
-          value={commits.toLocaleString()}
-          color={p.accent}
-          delay={18}
-          fps={fps}
-          frame={frame}
-        />
-        <Row
-          label="lines changed"
-          value={lines.toLocaleString()}
-          color={p.fg}
-          delay={32}
-          fps={fps}
-          frame={frame}
-          small
-        />
+        {rows.map((r, i) => (
+          <Row
+            key={r.label}
+            label={r.label}
+            target={r.target}
+            color={r.color}
+            delay={delays[i] ?? delays[delays.length - 1]}
+            fps={fps}
+            frame={frame}
+            small={i === rows.length - 1 && !r.highlight}
+          />
+        ))}
       </AbsoluteFill>
     </SceneBG>
   );
@@ -63,14 +90,15 @@ export const NumbersScene: React.FC<{ data: WrappedData }> = ({ data }) => {
 
 const Row: React.FC<{
   label: string;
-  value: string;
+  target: number;
   color: string;
   delay: number;
   fps: number;
   frame: number;
   small?: boolean;
-}> = ({ label, value, color, delay, fps, frame, small }) => {
+}> = ({ label, target, color, delay, fps, frame, small }) => {
   const s = springIn(frame, fps, delay);
+  const v = countTo(frame, delay + 2, 35, target);
   return (
     <div
       style={{
@@ -88,7 +116,7 @@ const Row: React.FC<{
           lineHeight: 0.9,
         }}
       >
-        {value}
+        {v.toLocaleString()}
       </div>
       <div
         style={{

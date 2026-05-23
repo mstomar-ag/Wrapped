@@ -23,28 +23,13 @@ Wrapped's visual signature comes from four things, applied consistently:
 
 ## Step-by-step
 
-### 1. Pick a palette
+### 1. Pick a palette (rotation-aware)
 
-Look at `src/theme.ts`. The existing palettes:
+Scenes get colors via **`usePalette("<sceneId>")`** from `src/themeRotation.ts`, not hardcoded `PALETTES.foo`. The assignment comes from a curated schedule selected by `pickSchedule(seed)` in `src/Wrapped.tsx`.
 
-```
-pink       hotpink + cream + yellow
-purple     deep purple + cream + lime
-lime       lime + dark green + purple
-tangerine  orange + cream + cobalt
-cobalt     blue + ice + yellow
-cream      cream + brown + pink
-black      black + light + lime
-ocean      teal + ice + yellow
-hotpink    hot pink + dark + cobalt
-```
+**For new colors or schedules**, follow **`.claude/skills/palette-rotation/SKILL.md`** first — it covers the four tokens (`bg`, `fg`, `accent`, `onAccent`), adding schedules, adjacency rules, and `commit` always on a dark bg.
 
-**Rule:** the new scene's palette must contrast with the scene before and after it. If your new slide goes between Numbers (purple) and PeakHour (cobalt), pick something warm — lime or tangerine.
-
-If none of the existing palettes fit, add one. Every palette is `{ bg, fg, accent }`. Constraints:
-- `fg` must be legible on `bg` (high contrast)
-- `accent` must be legible on `bg` too (it's used for the small heading)
-- Hex codes only, no opacity modifiers
+**For a one-off scene placement:** ensure your `SceneId` slot contrasts with neighbors in `buildScenes` order (member vs channel paths differ). Do not pick the same palette name on adjacent slides.
 
 ### 2. Copy a similar scene as a template
 

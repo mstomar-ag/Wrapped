@@ -1,5 +1,5 @@
 import { Composition } from "remotion";
-import { Wrapped, WRAPPED_FPS, WRAPPED_DURATION } from "./Wrapped";
+import { Wrapped, WRAPPED_FPS, WRAPPED_DURATION, totalDuration } from "./Wrapped";
 import { DUMMY } from "./data";
 
 export const Root: React.FC = () => {
@@ -12,6 +12,9 @@ export const Root: React.FC = () => {
       width={1080}
       height={1920}
       defaultProps={{ data: DUMMY }}
+      calculateMetadata={({ props }) => ({
+        durationInFrames: totalDuration(props.data),
+      })}
     />
   );
 };

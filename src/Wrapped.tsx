@@ -1,8 +1,9 @@
 import React from "react";
 import { AbsoluteFill, Sequence, Audio, staticFile, useCurrentFrame, interpolate } from "remotion";
 import { loadFont } from "@remotion/google-fonts/Inter";
-import { WrappedData } from "./data";
+import { WrappedData, DUMMY } from "./data";
 import { pickTrack } from "./music";
+import { ThemeProvider, pickSchedule } from "./themeRotation";
 import { IntroScene } from "./scenes/IntroScene";
 import { NumbersScene } from "./scenes/NumbersScene";
 import { PeakHourScene } from "./scenes/PeakHourScene";
@@ -17,43 +18,66 @@ loadFont("normal", { weights: ["400", "700", "800", "900"] });
 
 export const WRAPPED_FPS = 30;
 
-const SCENES = [
-  { Comp: IntroScene, dur: 60 },
-  { Comp: NumbersScene, dur: 105 },
-  { Comp: PeakHourScene, dur: 75 },
-  { Comp: EmojiScene, dur: 75 },
-  { Comp: ThreadScene, dur: 90 },
-  { Comp: CommitScene, dur: 105 },
-  { Comp: VibeScene, dur: 90 },
-  { Comp: WrapScene, dur: 75 },
-];
+type SceneDef = { Comp: React.FC<{ data: WrappedData }>; dur: number };
 
-export const WRAPPED_DURATION = SCENES.reduce((s, x) => s + x.dur, 0);
+// Scene selection depends on data:
+//   - channel wraps never include CommitScene (no GitHub data)
+//   - EmojiScene is dropped if there are zero emojis/reactions to feature
+export const buildScenes = (data: WrappedData): SceneDef[] => {
+  const isChannel = data.kind === "channel";
+  const hasEmoji = !!data.topEmoji && data.topEmoji.count > 0;
 
-const Soundtrack: React.FC<{ track: string }> = ({ track }) => {
+  const scenes: SceneDef[] = [
+    { Comp: IntroScene, dur: 60 },
+    { Comp: NumbersScene, dur: 105 },
+    { Comp: PeakHourScene, dur: 75 },
+  ];
+  if (hasEmoji) scenes.push({ Comp: EmojiScene, dur: 75 });
+  scenes.push({ Comp: ThreadScene, dur: 90 });
+  if (!isChannel) scenes.push({ Comp: CommitScene, dur: 105 });
+  scenes.push({ Comp: VibeScene, dur: 90 });
+  scenes.push({ Comp: WrapScene, dur: 75 });
+  return scenes;
+};
+
+export const totalDuration = (data: WrappedData): number =>
+  buildScenes(data).reduce((s, x) => s + x.dur, 0);
+
+/** Static fallback duration for Remotion CLI commands that use defaultProps. */
+export const WRAPPED_DURATION = totalDuration(DUMMY);
+
+const Soundtrack: React.FC<{ track: string; duration: number }> = ({ track, duration }) => {
   const frame = useCurrentFrame();
   const fadeIn = interpolate(frame, [0, 20], [0, 1], { extrapolateRight: "clamp" });
-  const fadeOut = interpolate(frame, [WRAPPED_DURATION - 30, WRAPPED_DURATION], [1, 0], {
+  const fadeOut = interpolate(frame, [duration - 30, duration], [1, 0], {
     extrapolateLeft: "clamp",
   });
   return <Audio src={staticFile(track)} volume={Math.min(fadeIn, fadeOut) * 0.85} startFrom={0} />;
 };
 
 export const Wrapped: React.FC<{ data: WrappedData }> = ({ data }) => {
+  const scenes = buildScenes(data);
+  const duration = scenes.reduce((s, x) => s + x.dur, 0);
   const track = pickTrack(data.handle || data.name);
+  // Seed by handle + weekLabel + kind so the same person's reel for the same
+  // week always looks identical, but week-over-week the palette rotates.
+  const schedule = pickSchedule(`${data.handle || data.name}|${data.weekLabel}|${data.kind ?? "member"}`);
+
   let from = 0;
   return (
-    <AbsoluteFill style={{ fontFamily: FONT_STACK, background: "#000" }}>
-      <Soundtrack track={track} />
-      {SCENES.map(({ Comp, dur }, i) => {
-        const start = from;
-        from += dur;
-        return (
-          <Sequence key={i} from={start} durationInFrames={dur}>
-            <Comp data={data} />
-          </Sequence>
-        );
-      })}
-    </AbsoluteFill>
+    <ThemeProvider value={schedule}>
+      <AbsoluteFill style={{ fontFamily: FONT_STACK, background: "#000" }}>
+        <Soundtrack track={track} duration={duration} />
+        {scenes.map(({ Comp, dur }, i) => {
+          const start = from;
+          from += dur;
+          return (
+            <Sequence key={i} from={start} durationInFrames={dur}>
+              <Comp data={data} />
+            </Sequence>
+          );
+        })}
+      </AbsoluteFill>
+    </ThemeProvider>
   );
 };

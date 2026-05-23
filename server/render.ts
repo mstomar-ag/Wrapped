@@ -1,4 +1,5 @@
 import path from "node:path";
+import os from "node:os";
 import fs from "node:fs/promises";
 import crypto from "node:crypto";
 import { bundle } from "@remotion/bundler";
@@ -20,7 +21,11 @@ const getBundle = () => {
   return bundlePromise;
 };
 
-const RENDER_CACHE_VERSION = "v2";
+// Cache invalidations:
+//   v2 → v3: PeakHourScene fix (hardcoded "11 PM")
+//   v3 → v4: theme rotation (palette per scene now varies per render seed)
+//   v4 → v5: emoji rendering (fonts-noto-color-emoji added to Docker image)
+const RENDER_CACHE_VERSION = "v5";
 
 const hashData = (data: WrappedData): string =>
   crypto
@@ -90,6 +95,23 @@ export const renderWrapped = async (
   const outPath = opts.outFile ? path.resolve(opts.outFile) : path.join(cacheDir, fileName);
 
   await fs.mkdir(path.dirname(outPath), { recursive: true });
+  // Render frames in parallel. Concurrency is the single biggest knob.
+  //
+  //   - On bare metal / your Mac → many cores, set RENDER_CONCURRENCY=8
+  //   - On Railway / small VM    → leave default OR set RENDER_CONCURRENCY=2
+  //
+  // `availableParallelism()` (Node ≥19) honors container cgroup limits, so a
+  // 2-vCPU Railway service reports 2 even when the underlying host has 32.
+  // `os.cpus().length` does NOT respect cgroups; never use it for this.
+  // Each worker holds ~150 MB; we cap at 6 to keep peak memory under ~1 GB.
+  const detected = typeof os.availableParallelism === "function"
+    ? os.availableParallelism()
+    : os.cpus().length;
+  const concurrency = process.env.RENDER_CONCURRENCY
+    ? Math.max(1, Number(process.env.RENDER_CONCURRENCY))
+    : Math.max(2, Math.min(6, detected - 1));
+
+  console.log(`[render] concurrency=${concurrency} (cores=${detected}) → ${outPath}`);
   await renderMedia({
     composition,
     serveUrl,
@@ -97,6 +119,7 @@ export const renderWrapped = async (
     outputLocation: outPath,
     inputProps: { data },
     browserExecutable,
+    concurrency,
   });
 
   if (!opts.outFile) await writeHashIndex(hash, outPath);

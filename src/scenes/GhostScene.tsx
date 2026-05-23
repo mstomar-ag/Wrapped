@@ -2,13 +2,13 @@ import React from "react";
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { SceneBG } from "../components/SceneBG";
 import { springIn, countTo } from "../components/anim";
-import { PALETTES } from "../theme";
+import { usePalette } from "../themeRotation";
 import { WrappedData } from "../data";
 
 export const GhostScene: React.FC<{ data: WrappedData }> = ({ data }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const p = PALETTES.cream;
+  const p = usePalette("weekend");
 
   const s = springIn(frame, fps, 0);
   const ghostS = springIn(frame, fps, 8, { damping: 8 });

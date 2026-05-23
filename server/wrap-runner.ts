@@ -114,36 +114,21 @@ const waitForArchiveEntry = async (id: string): Promise<ArchiveEntry> => {
 };
 
 // ─── Channel wrap ────────────────────────────────────────────────────────────
-export const runWrapForChannel = async (opts: {
+type ChannelWrapOpts = {
   channel: string;
   win: DateWindow;
   source: ArchiveSource;
   triggeredBy?: string;
   post?: { channelId: string; comment?: string } | null;
-}): Promise<ArchiveEntry> => {
+};
+
+/** Non-blocking: returns a queued archive entry; work runs in the background. */
+export const startWrapForChannel = (opts: ChannelWrapOpts): ArchiveEntry => {
   const { channel, win, source, triggeredBy, post } = opts;
-
-  const resolved = await resolveChannel(channel);
-  if (!resolved) {
-    const e = createEntry({
-      kind: "channel",
-      subject: channel,
-      subjectName: `#${channel}`,
-      windowFrom: win.start.toISOString(),
-      windowTo: win.end.toISOString(),
-      windowLabel: labelWindow(win),
-      source,
-      triggeredBy,
-      postedToSlack: false,
-    });
-    setStatus(e.id, "failed", { error: `Channel "${channel}" not found or bot lacks access` });
-    return e;
-  }
-
   const entry = createEntry({
     kind: "channel",
-    subject: resolved.id,
-    subjectName: `#${resolved.name}`,
+    subject: channel,
+    subjectName: channel.startsWith("#") ? channel : `#${channel}`,
     windowFrom: win.start.toISOString(),
     windowTo: win.end.toISOString(),
     windowLabel: labelWindow(win),
@@ -153,20 +138,45 @@ export const runWrapForChannel = async (opts: {
     slackChannelId: post?.channelId,
     progress: 0,
     phase: "queued",
+    progressMessage: "Queued…",
   });
+  void runChannelWrapJob(entry.id, opts);
+  return entry;
+};
 
+export const runWrapForChannel = async (opts: ChannelWrapOpts): Promise<ArchiveEntry> => {
+  const entry = startWrapForChannel(opts);
+  return waitForArchiveEntry(entry.id);
+};
+
+const runChannelWrapJob = async (entryId: string, opts: ChannelWrapOpts): Promise<void> => {
+  const { channel, win, post } = opts;
   try {
-    setWrapProgress(entry.id, "collecting", 10, `Scanning #${resolved.name}…`);
+    setWrapProgress(entryId, "collecting", 5, `Resolving channel…`);
+    const resolved = await resolveChannel(channel);
+    if (!resolved) {
+      setStatus(entryId, "failed", {
+        error: `Channel "${channel}" not found or bot lacks access`,
+      });
+      return;
+    }
+    // Update display name once we know the real one
+    setStatus(entryId, "rendering", {
+      subject: resolved.id,
+      subjectName: `#${resolved.name}`,
+    });
+
+    setWrapProgress(entryId, "collecting", 15, `Scanning #${resolved.name}…`);
     const t0 = Date.now();
     const signals = await collectChannel(resolved.id, win);
     if (!signals) throw new Error("Slack collector returned null (missing SLACK_BOT_TOKEN?)");
-    setWrapProgress(entry.id, "aggregating", 35, "Summarizing the channel…");
+    setWrapProgress(entryId, "aggregating", 35, "Summarizing the channel…");
     const data = buildChannelWrap(signals, win);
-    setWrapProgress(entry.id, "rendering", 45, "Rendering channel reel…");
-    const stopTick = trackRenderProgress(entry.id);
-    const file = await renderWrapped(data, { displayName: entry.subjectName });
+    setWrapProgress(entryId, "rendering", 45, "Rendering channel reel…");
+    const stopTick = trackRenderProgress(entryId);
+    const file = await renderWrapped(data, { displayName: `#${resolved.name}` });
     stopTick();
-    console.log(`[wrap] rendered ${entry.id} in ${Date.now() - t0}ms → ${file}`);
+    console.log(`[wrap] rendered ${entryId} in ${Date.now() - t0}ms → ${file}`);
 
     let postedToSlack = false;
     if (post?.channelId && file) {
@@ -178,17 +188,15 @@ export const runWrapForChannel = async (opts: {
       postedToSlack = true;
     }
 
-    return (
-      setStatus(entry.id, "ready", {
-        filePath: toRelativePath(file),
-        data,
-        postedToSlack,
-        progress: 100,
-      }) ?? entry
-    );
+    setStatus(entryId, "ready", {
+      filePath: toRelativePath(file),
+      data,
+      postedToSlack,
+      progress: 100,
+    });
   } catch (e) {
     const error = (e as Error).message;
-    console.error(`[wrap] channel=${resolved.name} failed: ${error}`);
-    return setStatus(entry.id, "failed", { error }) ?? entry;
+    console.error(`[wrap] channel job ${entryId} failed: ${error}`);
+    setStatus(entryId, "failed", { error });
   }
 };

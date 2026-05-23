@@ -2,13 +2,13 @@ import React from "react";
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from "remotion";
 import { SceneBG } from "../components/SceneBG";
 import { springIn } from "../components/anim";
-import { PALETTES } from "../theme";
+import { usePalette } from "../themeRotation";
 import { WrappedData } from "../data";
 
 export const WrapScene: React.FC<{ data: WrappedData }> = ({ data }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const p = PALETTES.pink;
+  const p = usePalette("wrap");
 
   const s1 = springIn(frame, fps, 0);
   const s2 = springIn(frame, fps, 10, { damping: 10 });
@@ -67,7 +67,7 @@ export const WrapScene: React.FC<{ data: WrappedData }> = ({ data }) => {
             padding: "20px 40px",
             borderRadius: 999,
             background: p.accent,
-            color: "#1a0010",
+            color: p.onAccent,
             fontSize: 38,
             fontWeight: 800,
             letterSpacing: -0.5,
