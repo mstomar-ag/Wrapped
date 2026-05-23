@@ -1,6 +1,7 @@
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { NavLink, Outlet, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "./auth";
 import { api } from "./api";
+import { LOGO_SRC } from "./brand";
 
 const nav = [
   { to: "/", label: "Home", end: true },
@@ -23,7 +24,9 @@ export const Layout: React.FC = () => {
   return (
     <div className="layout">
       <aside className="sidebar">
-        <div className="brand">Wrapped</div>
+        <Link to="/" className="brand-logo">
+          <img src={LOGO_SRC} alt="Wrapped" width={140} height={40} />
+        </Link>
         <nav className="nav">
           {nav.map((n) => (
             <NavLink key={n.to} to={n.to} end={n.end} className={({ isActive }) => (isActive ? "active" : undefined)}>

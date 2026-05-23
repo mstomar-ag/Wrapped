@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth";
+import { LOGO_SRC } from "../brand";
 
 export const Login: React.FC = () => {
   const { auth, loading } = useAuth();
@@ -40,20 +41,13 @@ export const Login: React.FC = () => {
           textAlign: "center",
         }}
       >
-        <div
-          style={{
-            fontWeight: 900,
-            fontSize: 44,
-            letterSpacing: -1.5,
-            backgroundImage: "linear-gradient(90deg, #ff1b6b, #ffd93d)",
-            WebkitBackgroundClip: "text",
-            backgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            marginBottom: 12,
-          }}
-        >
-          Wrapped
-        </div>
+        <img
+          src={LOGO_SRC}
+          alt="Wrapped"
+          width={200}
+          height={56}
+          style={{ maxWidth: "100%", height: "auto", marginBottom: 20 }}
+        />
         <p style={{ color: "#888", marginBottom: 28 }}>
           Sign in with your <strong style={{ color: "#f2f2f2" }}>@agrim.ai</strong> account to continue.
         </p>

@@ -461,7 +461,33 @@ app.post("/api/slack/command", async (c) => {
 
 // ─── Frontend ────────────────────────────────────────────────────────────────
 const ROOT = path.resolve(import.meta.dirname, "..");
+const PUBLIC_DIR = path.join(ROOT, "public");
 const FRONTEND_DIST = path.join(ROOT, "web", "dist");
+
+const PUBLIC_ASSET_TYPES: Record<string, string> = {
+  ".ico": "image/x-icon",
+  ".png": "image/png",
+  ".webmanifest": "application/manifest+json",
+};
+
+app.use("*", async (c, next) => {
+  const p = c.req.path;
+  const rel =
+    p === "/favicon.ico"
+      ? "favicon/favicon.ico"
+      : p === "/logo_wrapped.png" || p.startsWith("/favicon/")
+        ? p.slice(1)
+        : null;
+  if (!rel) return next();
+  const file = path.join(PUBLIC_DIR, rel);
+  if (!fs.existsSync(file)) return next();
+  const ext = path.extname(file);
+  return c.body(fs.readFileSync(file), 200, {
+    "Content-Type": PUBLIC_ASSET_TYPES[ext] ?? "application/octet-stream",
+    "Cache-Control": "public, max-age=86400",
+  });
+});
+
 if (fs.existsSync(FRONTEND_DIST)) {
   app.use("/assets/*", serveStatic({ root: "./web/dist" }));
   app.get("*", (c) => {
