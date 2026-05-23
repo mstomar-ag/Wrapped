@@ -1,0 +1,7 @@
+{
+  "enabled": true,
+  "cron": "0 17 * * 5",
+  "postTo": "channel",
+  "channelId": "C0B5N5BRBUM",
+  "window": "last-week"
+}

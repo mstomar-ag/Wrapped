@@ -25,7 +25,7 @@ export const Layout: React.FC = () => {
     <div className="layout">
       <aside className="sidebar">
         <Link to="/" className="brand-logo">
-          <img src={LOGO_SRC} alt="Wrapped" width={140} height={40} />
+          <img src={LOGO_SRC} alt="Wrapped" />
         </Link>
         <nav className="nav">
           {nav.map((n) => (

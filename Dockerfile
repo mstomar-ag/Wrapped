@@ -37,14 +37,19 @@ RUN npm ci --omit=dev --legacy-peer-deps
 
 COPY --chown=app:app . .
 COPY --from=web-build --chown=app:app /web/dist ./web/dist
+COPY --chown=app:app deploy/seed ./seed-data
 
 # Pre-install tsx as a runtime dep so `npx tsx` doesn't redownload it on boot
 RUN npm install --no-save tsx --legacy-peer-deps
 
-# Make sure /app and the volume mount points are writable by `app`
-RUN mkdir -p /app/data /app/out /app/.remotion-bundle && chown -R app:app /app
+# Make sure /app and the volume mount points exist (ownership fixed at boot for Railway volumes).
+RUN mkdir -p /app/data /app/out/cache /app/.remotion-bundle && chown -R app:app /app
 
-USER app
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+USER root
 EXPOSE 3000
 ENV NODE_ENV=production
+ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["npx", "tsx", "server/index.ts"]

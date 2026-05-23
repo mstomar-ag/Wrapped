@@ -43,6 +43,7 @@ import {
   startAuthFlow,
 } from "./auth/google";
 import { DateWindow } from "./collectors/types";
+import { bootstrapDataIfNeeded } from "./bootstrap-data";
 
 const app = new Hono();
 
@@ -473,11 +474,15 @@ const PUBLIC_ASSET_TYPES: Record<string, string> = {
 app.use("*", async (c, next) => {
   const p = c.req.path;
   const rel =
-    p === "/favicon.ico"
-      ? "favicon/favicon.ico"
-      : p === "/logo_wrapped.png" || p.startsWith("/favicon/")
-        ? p.slice(1)
-        : null;
+    p === "/favicon.ico" || p === "/wrapped_logo.ico"
+      ? "wrapped_logo.ico"
+      : p === "/wrapped_logo.png"
+        ? "wrapped_logo.png"
+        : p === "/site.webmanifest"
+          ? "site.webmanifest"
+          : p.startsWith("/favicon/")
+            ? p.slice(1)
+            : null;
   if (!rel) return next();
   const file = path.join(PUBLIC_DIR, rel);
   if (!fs.existsSync(file)) return next();
@@ -506,7 +511,9 @@ const loginRedirectHtml = (message: string) =>
     <p><a style="color:#ff1b6b" href="/login">Try again</a></p>
   </body></html>`;
 
+await bootstrapDataIfNeeded();
+
 const port = Number(process.env.PORT ?? 3000);
-serve({ fetch: app.fetch, port });
+serve({ fetch: app.fetch, port, hostname: "0.0.0.0" });
 startScheduler();
-console.log(`[boot] wrapped api listening on http://localhost:${port}`);
+console.log(`[boot] wrapped api listening on http://0.0.0.0:${port}`);

@@ -1,0 +1,1073 @@
+[
+  {
+    "id": "28ccb191c3c595c4",
+    "createdAt": "2026-05-23T13:36:33.127Z",
+    "status": "ready",
+    "kind": "member",
+    "subject": "chetan-gupta",
+    "subjectName": "Chetan Gupta",
+    "windowFrom": "2026-05-15T18:30:00.000Z",
+    "windowTo": "2026-05-23T18:29:59.999Z",
+    "windowLabel": "16 May 2026 – 23 May 2026",
+    "source": "ui",
+    "triggeredBy": "mayank.tomar@agrim.ai",
+    "postedToSlack": false,
+    "progress": 100,
+    "phase": "finishing",
+    "progressMessage": "Done!",
+    "filePath": "out/cache/chetan_gupta_20260523_133639.mp4",
+    "data": {
+      "kind": "member",
+      "name": "Chetan Gupta",
+      "handle": "@chetan.gupta",
+      "weekLabel": "16 May – 23 May",
+      "weekTitle": "Deep Work",
+      "vibe": "Steady, consistent, present. The team felt it.",
+      "numbers": {
+        "messages": 12,
+        "commits": 0,
+        "linesChanged": 8421
+      },
+      "peakHour": {
+        "hour": "12 PM",
+        "messages": 5
+      },
+      "topEmoji": {
+        "emoji": "💬",
+        "count": 0,
+        "label": "quiet week"
+      },
+      "thread": {
+        "channel": "#infinita-db",
+        "replies": 1,
+        "title": "We can't publish"
+      },
+      "commit": {
+        "repo": "wrpd/api",
+        "sha": "a1f9c0e",
+        "summary": "Rewrote the ingest pipeline. Half the code, twice the throughput.",
+        "additions": 612,
+        "deletions": 1284
+      },
+      "ghostMode": {
+        "streaks": 3,
+        "longestHours": 24
+      }
+    }
+  },
+  {
+    "id": "46a932f3fb8851bf",
+    "createdAt": "2026-05-23T13:31:43.011Z",
+    "status": "ready",
+    "kind": "member",
+    "subject": "mayank",
+    "subjectName": "Mayank Singh Tomar",
+    "windowFrom": "2026-05-21T18:30:00.000Z",
+    "windowTo": "2026-05-22T18:29:59.999Z",
+    "windowLabel": "22 May 2026 – 22 May 2026",
+    "source": "cli",
+    "postedToSlack": false,
+    "progress": 100,
+    "phase": "finishing",
+    "progressMessage": "Done!",
+    "filePath": "out/cache/mayank_singh_tomar_20260523_133149.mp4",
+    "data": {
+      "kind": "member",
+      "name": "Mayank Singh Tomar",
+      "handle": "@mayank.tomar",
+      "weekLabel": "22 May – 22 May",
+      "weekTitle": "The Steady Hand",
+      "vibe": "You said less and shipped more. The repo noticed.",
+      "numbers": {
+        "messages": 3,
+        "commits": 1,
+        "linesChanged": 149
+      },
+      "peakHour": {
+        "hour": "3 PM",
+        "messages": 2
+      },
+      "topEmoji": {
+        "emoji": "👍",
+        "count": 1,
+        "label": "+1"
+      },
+      "thread": {
+        "channel": "#infinita-db",
+        "replies": 1,
+        "title": "Sure"
+      },
+      "commit": {
+        "repo": "ice-tech-group/claims-playwright-tests",
+        "sha": "5acbff9",
+        "summary": "NOJIRA: Stabilise nightly CCAT-149/144/201/207 and authority-groups flows",
+        "additions": 128,
+        "deletions": 21
+      },
+      "ghostMode": {
+        "streaks": 0,
+        "longestHours": 1
+      }
+    }
+  },
+  {
+    "id": "8a472637ffccda2a",
+    "createdAt": "2026-05-23T13:25:10.335Z",
+    "status": "ready",
+    "kind": "member",
+    "subject": "mayank",
+    "subjectName": "Mayank Singh Tomar",
+    "windowFrom": "2026-05-15T18:30:00.000Z",
+    "windowTo": "2026-05-23T18:29:59.999Z",
+    "windowLabel": "16 May 2026 – 23 May 2026",
+    "source": "cli",
+    "postedToSlack": false,
+    "progress": 100,
+    "phase": "finishing",
+    "progressMessage": "Done!",
+    "filePath": "out/cache/mayank_singh_tomar_20260523_132518.mp4",
+    "data": {
+      "kind": "member",
+      "name": "Mayank Singh Tomar",
+      "handle": "@mayank.tomar",
+      "weekLabel": "16 May – 23 May",
+      "weekTitle": "Deep Work",
+      "vibe": "You said less and shipped more. The repo noticed.",
+      "numbers": {
+        "messages": 28,
+        "commits": 9,
+        "linesChanged": 21284
+      },
+      "peakHour": {
+        "hour": "12 PM",
+        "messages": 7
+      },
+      "topEmoji": {
+        "emoji": "👍",
+        "count": 5,
+        "label": "+1"
+      },
+      "thread": {
+        "channel": "#infinita-db",
+        "replies": 1,
+        "title": "@Swapnil Dubey New Plan for Internal Review: <https://docs.google.com/document/d"
+      },
+      "commit": {
+        "repo": "mstomar-ag/Wrapped",
+        "sha": "b156ed7",
+        "summary": "Deployment & docs",
+        "additions": 16460,
+        "deletions": 0
+      },
+      "ghostMode": {
+        "streaks": 5,
+        "longestHours": 44
+      }
+    }
+  },
+  {
+    "id": "fc12a7cdf7d2dc19",
+    "createdAt": "2026-05-23T13:24:43.140Z",
+    "status": "ready",
+    "kind": "member",
+    "subject": "mayank",
+    "subjectName": "Mayank Singh Tomar",
+    "windowFrom": "2026-05-15T18:31:00.000Z",
+    "windowTo": "2026-05-23T18:29:59.999Z",
+    "windowLabel": "16 May 2026 – 23 May 2026",
+    "source": "cli",
+    "postedToSlack": false,
+    "progress": 100,
+    "phase": "finishing",
+    "progressMessage": "Done!",
+    "filePath": "out/cache/mayank_singh_tomar_20260523_131042.mp4",
+    "data": {
+      "kind": "member",
+      "name": "Mayank Singh Tomar",
+      "handle": "@mayank.tomar",
+      "weekLabel": "16 May – 23 May",
+      "weekTitle": "Deep Work",
+      "vibe": "You said less and shipped more. The repo noticed.",
+      "numbers": {
+        "messages": 28,
+        "commits": 9,
+        "linesChanged": 21284
+      },
+      "peakHour": {
+        "hour": "12 PM",
+        "messages": 7
+      },
+      "topEmoji": {
+        "emoji": "👍",
+        "count": 5,
+        "label": "+1"
+      },
+      "thread": {
+        "channel": "#infinita-db",
+        "replies": 1,
+        "title": "@Swapnil Dubey New Plan for Internal Review: <https://docs.google.com/document/d"
+      },
+      "commit": {
+        "repo": "mstomar-ag/Wrapped",
+        "sha": "b156ed7",
+        "summary": "Deployment & docs",
+        "additions": 16460,
+        "deletions": 0
+      },
+      "ghostMode": {
+        "streaks": 5,
+        "longestHours": 44
+      }
+    }
+  },
+  {
+    "id": "30fd00051c144a2a",
+    "createdAt": "2026-05-23T13:22:59.411Z",
+    "status": "rendering",
+    "kind": "member",
+    "subject": "swapnil",
+    "subjectName": "Swapnil Dubey",
+    "windowFrom": "2026-05-15T18:30:00.000Z",
+    "windowTo": "2026-05-23T18:29:59.999Z",
+    "windowLabel": "16 May 2026 – 23 May 2026",
+    "source": "slack",
+    "triggeredBy": "U0A384S7PQQ",
+    "postedToSlack": false,
+    "slackChannelId": "C0B5N5BRBUM",
+    "progress": 53,
+    "phase": "rendering",
+    "progressMessage": "Rendering scenes…"
+  },
+  {
+    "id": "6b1b9350a2307224",
+    "createdAt": "2026-05-23T13:20:42.796Z",
+    "status": "ready",
+    "kind": "member",
+    "subject": "mayank",
+    "subjectName": "Mayank Singh Tomar",
+    "windowFrom": "2026-05-15T18:30:00.000Z",
+    "windowTo": "2026-05-23T18:29:59.999Z",
+    "windowLabel": "16 May 2026 – 23 May 2026",
+    "source": "slack",
+    "triggeredBy": "U0A384S7PQQ",
+    "postedToSlack": true,
+    "slackChannelId": "C0B5N5BRBUM",
+    "progress": 100,
+    "phase": "finishing",
+    "progressMessage": "Done!",
+    "filePath": "out/cache/mayank_singh_tomar_20260523_131042.mp4",
+    "data": {
+      "kind": "member",
+      "name": "Mayank Singh Tomar",
+      "handle": "@mayank.tomar",
+      "weekLabel": "16 May – 23 May",
+      "weekTitle": "Deep Work",
+      "vibe": "You said less and shipped more. The repo noticed.",
+      "numbers": {
+        "messages": 28,
+        "commits": 9,
+        "linesChanged": 21284
+      },
+      "peakHour": {
+        "hour": "12 PM",
+        "messages": 7
+      },
+      "topEmoji": {
+        "emoji": "👍",
+        "count": 5,
+        "label": "+1"
+      },
+      "thread": {
+        "channel": "#infinita-db",
+        "replies": 1,
+        "title": "@Swapnil Dubey New Plan for Internal Review: <https://docs.google.com/document/d"
+      },
+      "commit": {
+        "repo": "mstomar-ag/Wrapped",
+        "sha": "b156ed7",
+        "summary": "Deployment & docs",
+        "additions": 16460,
+        "deletions": 0
+      },
+      "ghostMode": {
+        "streaks": 5,
+        "longestHours": 44
+      }
+    }
+  },
+  {
+    "id": "92e8630db99ccadc",
+    "createdAt": "2026-05-23T13:19:08.538Z",
+    "status": "ready",
+    "kind": "channel",
+    "subject": "C0B40UQUG02",
+    "subjectName": "#infinita-db",
+    "windowFrom": "2026-05-15T18:30:00.000Z",
+    "windowTo": "2026-05-23T18:29:59.999Z",
+    "windowLabel": "16 May 2026 – 23 May 2026",
+    "source": "ui",
+    "triggeredBy": "mayank.tomar@agrim.ai",
+    "postedToSlack": false,
+    "progress": 100,
+    "phase": "rendering",
+    "progressMessage": "Warming up Chromium…",
+    "filePath": "out/cache/channel_infinita_db_20260523_131602.mp4",
+    "data": {
+      "kind": "channel",
+      "name": "#infinita-db",
+      "handle": "#infinita-db",
+      "weekLabel": "16 May 2026 – 23 May 2026",
+      "weekTitle": "Steady Channel",
+      "vibe": "Steady, lively, productive.",
+      "numbers": {
+        "messages": 73,
+        "commits": 5,
+        "linesChanged": 2
+      },
+      "peakHour": {
+        "hour": "12 PM",
+        "messages": 17
+      },
+      "topEmoji": {
+        "emoji": "👍",
+        "count": 5,
+        "label": "+1"
+      },
+      "thread": {
+        "channel": "#infinita-db",
+        "replies": 2,
+        "title": "Cannot be made public"
+      },
+      "commit": {
+        "repo": "#infinita-db",
+        "sha": "U0A3E9M",
+        "summary": "Rayyaan posted 19 times — the loudest voice.",
+        "additions": 19,
+        "deletions": 0
+      },
+      "ghostMode": {
+        "streaks": 0,
+        "longestHours": 37
+      }
+    }
+  },
+  {
+    "id": "b15ca95bb1f8e7cf",
+    "createdAt": "2026-05-23T13:15:59.258Z",
+    "status": "ready",
+    "kind": "channel",
+    "subject": "C0B40UQUG02",
+    "subjectName": "#infinita-db",
+    "windowFrom": "2026-05-15T18:30:00.000Z",
+    "windowTo": "2026-05-23T18:29:59.999Z",
+    "windowLabel": "16 May 2026 – 23 May 2026",
+    "source": "ui",
+    "triggeredBy": "mayank.tomar@agrim.ai",
+    "postedToSlack": false,
+    "progress": 100,
+    "phase": "rendering",
+    "progressMessage": "Almost there…",
+    "filePath": "out/cache/channel_infinita_db_20260523_131602.mp4",
+    "data": {
+      "kind": "channel",
+      "name": "#infinita-db",
+      "handle": "#infinita-db",
+      "weekLabel": "16 May 2026 – 23 May 2026",
+      "weekTitle": "Steady Channel",
+      "vibe": "Steady, lively, productive.",
+      "numbers": {
+        "messages": 73,
+        "commits": 5,
+        "linesChanged": 2
+      },
+      "peakHour": {
+        "hour": "12 PM",
+        "messages": 17
+      },
+      "topEmoji": {
+        "emoji": "👍",
+        "count": 5,
+        "label": "+1"
+      },
+      "thread": {
+        "channel": "#infinita-db",
+        "replies": 2,
+        "title": "Cannot be made public"
+      },
+      "commit": {
+        "repo": "#infinita-db",
+        "sha": "U0A3E9M",
+        "summary": "Rayyaan posted 19 times — the loudest voice.",
+        "additions": 19,
+        "deletions": 0
+      },
+      "ghostMode": {
+        "streaks": 0,
+        "longestHours": 37
+      }
+    }
+  },
+  {
+    "id": "655491f902176dee",
+    "createdAt": "2026-05-23T13:10:33.804Z",
+    "status": "ready",
+    "kind": "member",
+    "subject": "mayank",
+    "subjectName": "Mayank Singh Tomar",
+    "windowFrom": "2026-05-15T18:30:00.000Z",
+    "windowTo": "2026-05-23T18:29:59.999Z",
+    "windowLabel": "16 May 2026 – 23 May 2026",
+    "source": "cli",
+    "postedToSlack": false,
+    "progress": 100,
+    "phase": "finishing",
+    "progressMessage": "Done!",
+    "filePath": "out/cache/mayank_singh_tomar_20260523_131042.mp4",
+    "data": {
+      "kind": "member",
+      "name": "Mayank Singh Tomar",
+      "handle": "@mayank.tomar",
+      "weekLabel": "16 May – 23 May",
+      "weekTitle": "Deep Work",
+      "vibe": "You said less and shipped more. The repo noticed.",
+      "numbers": {
+        "messages": 28,
+        "commits": 9,
+        "linesChanged": 21284
+      },
+      "peakHour": {
+        "hour": "12 PM",
+        "messages": 7
+      },
+      "topEmoji": {
+        "emoji": "👍",
+        "count": 5,
+        "label": "+1"
+      },
+      "thread": {
+        "channel": "#infinita-db",
+        "replies": 1,
+        "title": "@Swapnil Dubey New Plan for Internal Review: <https://docs.google.com/document/d"
+      },
+      "commit": {
+        "repo": "mstomar-ag/Wrapped",
+        "sha": "b156ed7",
+        "summary": "Deployment & docs",
+        "additions": 16460,
+        "deletions": 0
+      },
+      "ghostMode": {
+        "streaks": 5,
+        "longestHours": 44
+      }
+    }
+  },
+  {
+    "id": "760fb69655288622",
+    "createdAt": "2026-05-23T13:10:27.507Z",
+    "status": "ready",
+    "kind": "member",
+    "subject": "mayank",
+    "subjectName": "Mayank Singh Tomar",
+    "windowFrom": "2026-05-15T18:30:00.000Z",
+    "windowTo": "2026-05-23T18:29:59.999Z",
+    "windowLabel": "16 May 2026 – 23 May 2026",
+    "source": "ui",
+    "triggeredBy": "mayank.tomar@agrim.ai",
+    "postedToSlack": false,
+    "progress": 100,
+    "phase": "finishing",
+    "progressMessage": "Done!",
+    "filePath": "out/cache/mayank_singh_tomar_20260523_131038.mp4",
+    "data": {
+      "kind": "member",
+      "name": "Mayank Singh Tomar",
+      "handle": "@mayank.tomar",
+      "weekLabel": "16 May – 23 May",
+      "weekTitle": "Deep Work",
+      "vibe": "You said less and shipped more. The repo noticed.",
+      "numbers": {
+        "messages": 28,
+        "commits": 9,
+        "linesChanged": 21284
+      },
+      "peakHour": {
+        "hour": "12 PM",
+        "messages": 7
+      },
+      "topEmoji": {
+        "emoji": "👍",
+        "count": 5,
+        "label": "+1"
+      },
+      "thread": {
+        "channel": "#infinita-db",
+        "replies": 1,
+        "title": "@Swapnil Dubey New Plan for Internal Review: <https://docs.google.com/document/d"
+      },
+      "commit": {
+        "repo": "mstomar-ag/Wrapped",
+        "sha": "b156ed7",
+        "summary": "Deployment & docs",
+        "additions": 16460,
+        "deletions": 0
+      },
+      "ghostMode": {
+        "streaks": 5,
+        "longestHours": 44
+      }
+    }
+  },
+  {
+    "id": "fc58b41fc1215bcf",
+    "createdAt": "2026-05-23T13:01:46.526Z",
+    "status": "ready",
+    "kind": "member",
+    "subject": "swapnil",
+    "subjectName": "Swapnil Dubey",
+    "windowFrom": "2026-05-15T18:30:00.000Z",
+    "windowTo": "2026-05-23T18:29:59.999Z",
+    "windowLabel": "16 May 2026 – 23 May 2026",
+    "source": "cli",
+    "postedToSlack": false,
+    "progress": 100,
+    "phase": "finishing",
+    "progressMessage": "Done!",
+    "filePath": "out/cache/swapnil_dubey_20260523_130154.mp4",
+    "data": {
+      "kind": "member",
+      "name": "Swapnil Dubey",
+      "handle": "@swapnil",
+      "weekLabel": "16 May – 23 May",
+      "weekTitle": "Deep Work",
+      "vibe": "You said less and shipped more. The repo noticed.",
+      "numbers": {
+        "messages": 9,
+        "commits": 10,
+        "linesChanged": 77285
+      },
+      "peakHour": {
+        "hour": "2 PM",
+        "messages": 3
+      },
+      "topEmoji": {
+        "emoji": "👍",
+        "count": 1,
+        "label": "+1"
+      },
+      "thread": {
+        "channel": "#infinita-db",
+        "replies": 1,
+        "title": "@Mayank when will you be sharing this with Infinita Labs"
+      },
+      "commit": {
+        "repo": "Agrim-Intelligence/kg-storytelling-platform",
+        "sha": "d82723d",
+        "summary": "refactor: delete obsolete services, fix doc-vs-code drift across 8 docs",
+        "additions": 809,
+        "deletions": 22325
+      },
+      "ghostMode": {
+        "streaks": 2,
+        "longestHours": 38
+      }
+    }
+  },
+  {
+    "id": "c2bcdba032804ac2",
+    "createdAt": "2026-05-23T12:59:35.466Z",
+    "status": "ready",
+    "kind": "member",
+    "subject": "mayank",
+    "subjectName": "Mayank Singh Tomar",
+    "windowFrom": "2026-05-15T18:30:00.000Z",
+    "windowTo": "2026-05-23T18:29:59.999Z",
+    "windowLabel": "16 May 2026 – 23 May 2026",
+    "source": "cli",
+    "postedToSlack": false,
+    "progress": 100,
+    "phase": "finishing",
+    "progressMessage": "Done!",
+    "filePath": "out/cache/mayank_singh_tomar_20260523_125945.mp4",
+    "data": {
+      "kind": "member",
+      "name": "Mayank Singh Tomar",
+      "handle": "@mayank.tomar",
+      "weekLabel": "16 May – 23 May",
+      "weekTitle": "Deep Work",
+      "vibe": "You said less and shipped more. The repo noticed.",
+      "numbers": {
+        "messages": 27,
+        "commits": 9,
+        "linesChanged": 21284
+      },
+      "peakHour": {
+        "hour": "12 PM",
+        "messages": 7
+      },
+      "topEmoji": {
+        "emoji": "👍",
+        "count": 5,
+        "label": "+1"
+      },
+      "thread": {
+        "channel": "#infinita-db",
+        "replies": 1,
+        "title": "@Swapnil Dubey New Plan for Internal Review: <https://docs.google.com/document/d"
+      },
+      "commit": {
+        "repo": "mstomar-ag/Wrapped",
+        "sha": "b156ed7",
+        "summary": "Deployment & docs",
+        "additions": 16460,
+        "deletions": 0
+      },
+      "ghostMode": {
+        "streaks": 5,
+        "longestHours": 44
+      }
+    }
+  },
+  {
+    "id": "9d7d74afdfc19b79",
+    "createdAt": "2026-05-23T12:49:19.923Z",
+    "status": "ready",
+    "kind": "member",
+    "subject": "mayank",
+    "subjectName": "Mayank Singh Tomar",
+    "windowFrom": "2026-05-15T18:30:00.000Z",
+    "windowTo": "2026-05-23T18:29:59.999Z",
+    "windowLabel": "16 May 2026 – 23 May 2026",
+    "source": "ui",
+    "triggeredBy": "mayank.tomar@agrim.ai",
+    "postedToSlack": false,
+    "progress": 100,
+    "phase": "finishing",
+    "progressMessage": "Done!",
+    "filePath": "out/cache/mayank_singh_tomar_20260523_124109.mp4",
+    "data": {
+      "kind": "member",
+      "name": "Mayank Singh Tomar",
+      "handle": "@mayank.tomar",
+      "weekLabel": "16 May – 23 May",
+      "weekTitle": "Deep Work",
+      "vibe": "You said less and shipped more. The repo noticed.",
+      "numbers": {
+        "messages": 27,
+        "commits": 9,
+        "linesChanged": 21284
+      },
+      "peakHour": {
+        "hour": "12 PM",
+        "messages": 7
+      },
+      "topEmoji": {
+        "emoji": "👍",
+        "count": 5,
+        "label": "+1"
+      },
+      "thread": {
+        "channel": "#infinita-db",
+        "replies": 1,
+        "title": "@Swapnil Dubey New Plan for Internal Review: <https://docs.google.com/document/d"
+      },
+      "commit": {
+        "repo": "mstomar-ag/Wrapped",
+        "sha": "b156ed7",
+        "summary": "Deployment & docs",
+        "additions": 16460,
+        "deletions": 0
+      },
+      "ghostMode": {
+        "streaks": 5,
+        "longestHours": 44
+      }
+    }
+  },
+  {
+    "id": "963c067153cd8048",
+    "createdAt": "2026-05-23T12:44:18.709Z",
+    "status": "ready",
+    "kind": "channel",
+    "subject": "C0B40UQUG02",
+    "subjectName": "#infinita-db",
+    "windowFrom": "2026-05-15T18:30:00.000Z",
+    "windowTo": "2026-05-23T18:29:59.999Z",
+    "windowLabel": "16 May 2026 – 23 May 2026",
+    "source": "cli",
+    "postedToSlack": false,
+    "progress": 100,
+    "phase": "rendering",
+    "progressMessage": "Almost there…",
+    "filePath": "out/cache/channel_infinita_db_20260523_124421.mp4",
+    "data": {
+      "kind": "channel",
+      "name": "#infinita-db",
+      "handle": "#infinita-db",
+      "weekLabel": "16 May 2026 – 23 May 2026",
+      "weekTitle": "Steady Channel",
+      "vibe": "Steady, lively, productive.",
+      "numbers": {
+        "messages": 73,
+        "commits": 5,
+        "linesChanged": 2
+      },
+      "peakHour": {
+        "hour": "12 PM",
+        "messages": 17
+      },
+      "topEmoji": {
+        "emoji": "👍",
+        "count": 5,
+        "label": "+1"
+      },
+      "thread": {
+        "channel": "#infinita-db",
+        "replies": 2,
+        "title": "Cannot be made public"
+      },
+      "commit": {
+        "repo": "#infinita-db",
+        "sha": "U0A3E9M",
+        "summary": "Rayyaan posted 19 times — the loudest voice.",
+        "additions": 19,
+        "deletions": 0
+      },
+      "ghostMode": {
+        "streaks": 0,
+        "longestHours": 37
+      }
+    }
+  },
+  {
+    "id": "e7f5c71212bd3b58",
+    "createdAt": "2026-05-23T12:21:51.730Z",
+    "status": "ready",
+    "kind": "channel",
+    "subject": "C0B40UQUG02",
+    "subjectName": "#infinita-db",
+    "windowFrom": "2026-05-14T18:30:00.000Z",
+    "windowTo": "2026-05-23T18:29:59.999Z",
+    "windowLabel": "15 May 2026 – 23 May 2026",
+    "source": "ui",
+    "triggeredBy": "mayank.tomar@agrim.ai",
+    "postedToSlack": false,
+    "progress": 100,
+    "phase": "rendering",
+    "progressMessage": "Almost there…",
+    "filePath": "out/cache/channel_infinita_db_20260523_122157.mp4",
+    "data": {
+      "kind": "channel",
+      "name": "#infinita-db",
+      "handle": "#infinita-db",
+      "weekLabel": "15 May 2026 – 23 May 2026",
+      "weekTitle": "Steady Channel",
+      "vibe": "Steady, lively, productive.",
+      "numbers": {
+        "messages": 90,
+        "commits": 5,
+        "linesChanged": 2
+      },
+      "peakHour": {
+        "hour": "12 PM",
+        "messages": 17
+      },
+      "topEmoji": {
+        "emoji": "👍",
+        "count": 6,
+        "label": "+1"
+      },
+      "thread": {
+        "channel": "#infinita-db",
+        "replies": 2,
+        "title": "Cannot be made public"
+      },
+      "commit": {
+        "repo": "#infinita-db",
+        "sha": "U0A384S",
+        "summary": "Mayank posted 21 times — the loudest voice.",
+        "additions": 21,
+        "deletions": 0
+      },
+      "ghostMode": {
+        "streaks": 0,
+        "longestHours": 37
+      }
+    }
+  },
+  {
+    "id": "eb426e75292f4530",
+    "createdAt": "2026-05-23T12:08:35.075Z",
+    "status": "ready",
+    "kind": "member",
+    "subject": "mayank",
+    "subjectName": "Mayank Singh Tomar",
+    "windowFrom": "2026-05-15T18:30:00.000Z",
+    "windowTo": "2026-05-23T18:29:59.999Z",
+    "windowLabel": "16 May 2026 – 23 May 2026",
+    "source": "ui",
+    "triggeredBy": "mayank.tomar@agrim.ai",
+    "postedToSlack": false,
+    "progress": 100,
+    "phase": "finishing",
+    "progressMessage": "Done!",
+    "filePath": "out/cache/mayank_singh_tomar_20260523_120840.mp4",
+    "data": {
+      "name": "Mayank Singh Tomar",
+      "handle": "@mayank.tomar",
+      "weekLabel": "16 May – 23 May",
+      "weekTitle": "Deep Work",
+      "vibe": "You said less and shipped more. The repo noticed.",
+      "numbers": {
+        "messages": 28,
+        "commits": 9,
+        "linesChanged": 21284
+      },
+      "peakHour": {
+        "hour": "12 PM",
+        "messages": 9
+      },
+      "topEmoji": {
+        "emoji": "👍",
+        "count": 1,
+        "label": "+1"
+      },
+      "thread": {
+        "channel": "#infinita-db",
+        "replies": 1,
+        "title": "@Swapnil Dubey New Plan for Internal Review: <https://docs.google.com/document/d"
+      },
+      "commit": {
+        "repo": "mstomar-ag/Wrapped",
+        "sha": "b156ed7",
+        "summary": "Deployment & docs",
+        "additions": 16460,
+        "deletions": 0
+      },
+      "ghostMode": {
+        "streaks": 5,
+        "longestHours": 44
+      }
+    }
+  },
+  {
+    "id": "51c0c86aa5003bb8",
+    "createdAt": "2026-05-23T11:59:18.307Z",
+    "status": "ready",
+    "kind": "member",
+    "subject": "swapnil",
+    "subjectName": "Swapnil Dubey",
+    "windowFrom": "2026-04-30T18:30:00.000Z",
+    "windowTo": "2026-05-23T18:29:59.999Z",
+    "windowLabel": "1 May 2026 – 23 May 2026",
+    "source": "ui",
+    "triggeredBy": "mayank.tomar@agrim.ai",
+    "postedToSlack": false,
+    "progress": 100,
+    "phase": "finishing",
+    "progressMessage": "Done!",
+    "filePath": "out/cache/swapnil_dubey_20260523_115951.mp4",
+    "data": {
+      "name": "Swapnil Dubey",
+      "handle": "@swapnil",
+      "weekLabel": "1 May – 23 May",
+      "weekTitle": "The Quiet Shipper",
+      "vibe": "You said less and shipped more. The repo noticed.",
+      "numbers": {
+        "messages": 14,
+        "commits": 57,
+        "linesChanged": 135422
+      },
+      "peakHour": {
+        "hour": "2 PM",
+        "messages": 3
+      },
+      "topEmoji": {
+        "emoji": "👍",
+        "count": 1,
+        "label": "+1"
+      },
+      "thread": {
+        "channel": "#infinita-db",
+        "replies": 1,
+        "title": "@Swapnil Dubey has joined the channel"
+      },
+      "commit": {
+        "repo": "Agrim-Intelligence/kg-storytelling-platform",
+        "sha": "36449c8",
+        "summary": "fix(animation): conditional PainterI2V swap — root cause of Wan2.2 hallucination on static shots",
+        "additions": 31284,
+        "deletions": 118
+      },
+      "ghostMode": {
+        "streaks": 4,
+        "longestHours": 94
+      }
+    }
+  },
+  {
+    "id": "32b4ad072a181200",
+    "createdAt": "2026-05-23T11:56:01.152Z",
+    "status": "ready",
+    "kind": "channel",
+    "subject": "C083YGK0KF0",
+    "subjectName": "#all-agrim",
+    "windowFrom": "2026-05-15T18:30:00.000Z",
+    "windowTo": "2026-05-23T18:29:59.999Z",
+    "windowLabel": "16 May 2026 – 23 May 2026",
+    "source": "ui",
+    "triggeredBy": "mayank.tomar@agrim.ai",
+    "postedToSlack": false,
+    "progress": 100,
+    "phase": "rendering",
+    "progressMessage": "Stitching frames…",
+    "filePath": "out/cache/channel_all_agrim_20260523_115602.mp4",
+    "data": {
+      "name": "#all-agrim",
+      "handle": "#all-agrim",
+      "weekLabel": "16 May 2026 – 23 May 2026",
+      "weekTitle": "Sleepy Cousin",
+      "vibe": "Steady, lively, productive.",
+      "numbers": {
+        "messages": 22,
+        "commits": 4,
+        "linesChanged": 0
+      },
+      "peakHour": {
+        "hour": "12 PM",
+        "messages": 7
+      },
+      "topEmoji": {
+        "emoji": "💬",
+        "count": 3,
+        "label": "white_check_mark"
+      },
+      "thread": {
+        "channel": "#eng-platform",
+        "replies": 41,
+        "title": "should we drop the legacy auth shim?"
+      },
+      "commit": {
+        "repo": "#all-agrim",
+        "sha": "U083QK5",
+        "summary": "Girijesh Jha posted 10 times — the channel's loudest voice.",
+        "additions": 10,
+        "deletions": 0
+      },
+      "ghostMode": {
+        "streaks": 0,
+        "longestHours": 56
+      }
+    }
+  },
+  {
+    "id": "6858d620df31ee02",
+    "createdAt": "2026-05-23T11:51:34.320Z",
+    "status": "ready",
+    "kind": "member",
+    "subject": "mayank",
+    "subjectName": "Mayank Singh Tomar",
+    "windowFrom": "2026-04-30T18:30:00.000Z",
+    "windowTo": "2026-05-23T18:29:59.999Z",
+    "windowLabel": "1 May 2026 – 23 May 2026",
+    "source": "ui",
+    "triggeredBy": "mayank.tomar@agrim.ai",
+    "postedToSlack": false,
+    "progress": 100,
+    "phase": "finishing",
+    "progressMessage": "Done!",
+    "filePath": "out/cache/mayank_singh_tomar_20260523_115202.mp4",
+    "data": {
+      "name": "Mayank Singh Tomar",
+      "handle": "@mayank.tomar",
+      "weekLabel": "1 May – 23 May",
+      "weekTitle": "The Quiet Shipper",
+      "vibe": "You said less and shipped more. The repo noticed.",
+      "numbers": {
+        "messages": 37,
+        "commits": 41,
+        "linesChanged": 101474
+      },
+      "peakHour": {
+        "hour": "12 PM",
+        "messages": 9
+      },
+      "topEmoji": {
+        "emoji": "👍",
+        "count": 1,
+        "label": "+1"
+      },
+      "thread": {
+        "channel": "#ice-qa-automation",
+        "replies": 1,
+        "title": "Hi @Chetan @Swapnil Dubey\nI have sent you invite for the call regarding \"In-shor"
+      },
+      "commit": {
+        "repo": "mstomar-ag/Wrapped",
+        "sha": "b156ed7",
+        "summary": "Deployment & docs",
+        "additions": 16460,
+        "deletions": 0
+      },
+      "ghostMode": {
+        "streaks": 12,
+        "longestHours": 121
+      }
+    }
+  },
+  {
+    "id": "d737da3efaed1185",
+    "createdAt": "2026-05-23T11:42:32.543Z",
+    "status": "ready",
+    "kind": "member",
+    "subject": "mayank",
+    "subjectName": "Mayank Singh Tomar",
+    "windowFrom": "2026-05-15T18:30:00.000Z",
+    "windowTo": "2026-05-23T18:29:59.999Z",
+    "windowLabel": "May 16, 2026 – May 23, 2026",
+    "source": "ui",
+    "triggeredBy": "mayank.tomar@agrim.ai",
+    "postedToSlack": false,
+    "progress": 100,
+    "phase": "finishing",
+    "progressMessage": "Done!",
+    "filePath": "out/cache/mayank_singh_tomar_20260523_114238.mp4",
+    "data": {
+      "name": "Mayank Singh Tomar",
+      "handle": "@mayank.tomar",
+      "weekLabel": "May 16 – May 23",
+      "weekTitle": "Deep Work",
+      "vibe": "You said less and shipped more. The repo noticed.",
+      "numbers": {
+        "messages": 28,
+        "commits": 8,
+        "linesChanged": 19209
+      },
+      "peakHour": {
+        "hour": "12 PM",
+        "messages": 9
+      },
+      "topEmoji": {
+        "emoji": "👍",
+        "count": 1,
+        "label": "+1"
+      },
+      "thread": {
+        "channel": "#infinita-db",
+        "replies": 1,
+        "title": "@Swapnil Dubey New Plan for Internal Review: <https://docs.google.com/document/d"
+      },
+      "commit": {
+        "repo": "mstomar-ag/Wrapped",
+        "sha": "b156ed7",
+        "summary": "Deployment & docs",
+        "additions": 16460,
+        "deletions": 0
+      },
+      "ghostMode": {
+        "streaks": 5,
+        "longestHours": 44
+      }
+    }
+  }
+]

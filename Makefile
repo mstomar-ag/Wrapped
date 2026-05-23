@@ -157,16 +157,11 @@ railway-status:
 	railway status
 
 railway-volume:
-	@# Wrapped needs TWO mounts: /app/data (registry + archive metadata)
-	@# and /app/out (the rendered MP4s themselves). Losing either is bad.
-	@if [ -n "$(RAILWAY_SERVICE)" ]; then \
-	  railway volume add --mount-path /app/data --service "$(RAILWAY_SERVICE)"; \
-	  railway volume add --mount-path /app/out  --service "$(RAILWAY_SERVICE)"; \
-	else \
-	  railway volume add --mount-path /app/data; \
-	  railway volume add --mount-path /app/out; \
-	fi
-	@echo "Volume mounts: /app/data (members, archive, schedule) + /app/out (rendered videos)"
+	@# One volume at /app/data (Hobby) — also set WRAPPED_CACHE_DIR=/app/data/cache on Railway.
+	@# Two-volume plans: run `railway volume add --mount-path /app/out` after /app/data exists.
+	@railway volume add --mount-path /app/data || true
+	@echo "If your plan allows a second volume: railway volume add --mount-path /app/out"
+	@echo "Single-volume deploy: railway variables set WRAPPED_CACHE_DIR=/app/data/cache"
 
 railway-vars:
 	@echo "Set variables in Railway dashboard or: railway variables set KEY=value"

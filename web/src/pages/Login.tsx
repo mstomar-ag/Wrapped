@@ -44,9 +44,7 @@ export const Login: React.FC = () => {
         <img
           src={LOGO_SRC}
           alt="Wrapped"
-          width={200}
-          height={56}
-          style={{ maxWidth: "100%", height: "auto", marginBottom: 20 }}
+          style={{ width: "100%", maxWidth: 280, height: "auto", marginBottom: 20 }}
         />
         <p style={{ color: "#888", marginBottom: 28 }}>
           Sign in with your <strong style={{ color: "#f2f2f2" }}>@agrim.ai</strong> account to continue.

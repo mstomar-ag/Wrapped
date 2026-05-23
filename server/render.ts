@@ -6,6 +6,7 @@ import { bundle } from "@remotion/bundler";
 import { renderMedia, selectComposition } from "@remotion/renderer";
 import { WrappedData } from "../src/data";
 import { buildRenderFileName } from "./render-path";
+import { renderCacheDir } from "./paths";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 
@@ -50,7 +51,8 @@ export type RenderOptions = {
   outFile?: string;
 };
 
-const hashIndexPath = (hash: string) => path.join(ROOT, "out", "cache", ".by-hash", `${hash}.json`);
+const hashIndexPath = (hash: string) =>
+  path.join(renderCacheDir(), ".by-hash", `${hash}.json`);
 
 const readHashIndex = async (hash: string): Promise<string | null> => {
   try {
@@ -73,7 +75,7 @@ export const renderWrapped = async (
   data: WrappedData,
   opts: RenderOptions = {},
 ): Promise<string> => {
-  const cacheDir = path.join(ROOT, "out", "cache");
+  const cacheDir = renderCacheDir();
   const hash = hashData(data);
 
   if (!opts.outFile) {

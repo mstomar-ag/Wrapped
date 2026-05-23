@@ -127,7 +127,7 @@ railway variables set PUBLIC_BASE_URL=https://your-service.up.railway.app
 | `ENCRYPTION_KEY`                                              | Yes if using OAuth self-link                |
 | `GITHUB_ORG`                                                  | Optional (`Agrim-Intelligence`)             |
 
-`PORT` is set by Railway automatically. Full list: `.env.example`.
+**Do not set `PORT` in Railway Variables** — Railway injects the correct listen port (often not 3000). Hardcoding `PORT=3000` causes a public **502** while internal health checks still pass. Full list: `.env.example`.
 
 Redeploy after changing variables (`make railway-deploy` or dashboard **Deploy**).
 
@@ -221,6 +221,48 @@ GitHub deploy-on-push: connect the repo in Railway; complete steps 4–7 once pe
 [ ] Slack slash command URL → /api/slack/command
 [ ] curl /api/health + test /wrapped in Slack
 ```
+
+---
+
+## Troubleshooting
+
+### Public URL returns 502 but deploy shows “healthy”
+
+1. **Delete `PORT` from Railway Variables** if you added it manually. Railway assigns the listen port (e.g. `8080`); hardcoding `3000` breaks the public proxy while internal health checks still pass.
+2. The app must listen on **`0.0.0.0`** and `process.env.PORT` (already fixed in `server/index.ts`).
+
+After fixing, redeploy:
+
+```bash
+make railway-deploy
+curl -s https://<your-domain>/api/health
+```
+
+### Volume / permission errors (`EACCES` on `data/` or `out/`)
+
+Railway volumes are often mounted as **root**. The image entrypoint `docker-entrypoint.sh` `chown`s `/app/data` and `/app/out` for the `app` user before starting the server. If writes still fail, confirm both mounts exist:
+
+```bash
+railway volume list
+# expect: /app/data AND /app/out
+make railway-volume   # adds both if missing
+```
+
+An empty `/app/data` volume hides any `members.json` baked into the image — **seed** after first attach:
+
+```bash
+railway volume files upload ./data/members.json /members.json
+```
+
+### Only one volume per service (Hobby / personal plans)
+
+Railway often allows **one** volume mount per service. You already have `/app/data` — use it for videos too:
+
+```bash
+railway variables set WRAPPED_CACHE_DIR=/app/data/cache
+```
+
+Redeploy. MP4s and `members.json` then live on the same volume. Pro/team plans can add a second mount at `/app/out` instead (see `make railway-volume`).
 
 ---
 

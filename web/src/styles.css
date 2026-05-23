@@ -43,9 +43,10 @@ a:hover { text-decoration: underline; }
 .brand-logo img {
   display: block;
   width: auto;
-  max-width: 100%;
+  max-width: min(100%, 160px);
   height: 40px;
   object-fit: contain;
+  object-position: left center;
 }
 .nav { display: flex; flex-direction: column; gap: 4px; }
 .nav a {
