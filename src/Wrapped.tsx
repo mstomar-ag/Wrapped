@@ -1,7 +1,7 @@
 import React from "react";
-import { AbsoluteFill, Sequence, Audio, staticFile, useCurrentFrame, interpolate } from "remotion";
+import { AbsoluteFill, Sequence, Audio, staticFile, useCurrentFrame, interpolate, useVideoConfig } from "remotion";
 import { loadFont } from "@remotion/google-fonts/Inter";
-import { WrappedData, DUMMY } from "./data";
+import { WrappedData, DUMMY, QUALITY_DIMENSIONS } from "./data";
 import { pickTrack } from "./music";
 import { ThemeProvider, pickSchedule } from "./themeRotation";
 import { IntroScene } from "./scenes/IntroScene";
@@ -55,6 +55,32 @@ const Soundtrack: React.FC<{ track: string; duration: number }> = ({ track, dura
   return <Audio src={staticFile(track)} volume={Math.min(fadeIn, fadeOut) * 0.85} startFrom={0} />;
 };
 
+/** All scenes are authored against a 1080×1920 layout. At lower output
+ * resolutions (e.g. 720×1280 standard quality) we keep the design canvas
+ * fixed and CSS-scale it down. The browser rasterises at the smaller output
+ * size, so we still get the speed win — but every fontSize/padding stays
+ * in proportion to the frame. */
+const DesignCanvas: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { width } = useVideoConfig();
+  const design = QUALITY_DIMENSIONS.high; // 1080×1920 reference
+  const scale = width / design.width;
+  return (
+    <div
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: design.width,
+        height: design.height,
+        transform: `scale(${scale})`,
+        transformOrigin: "top left",
+      }}
+    >
+      {children}
+    </div>
+  );
+};
+
 export const Wrapped: React.FC<{ data: WrappedData }> = ({ data }) => {
   const scenes = buildScenes(data);
   const duration = scenes.reduce((s, x) => s + x.dur, 0);
@@ -68,15 +94,17 @@ export const Wrapped: React.FC<{ data: WrappedData }> = ({ data }) => {
     <ThemeProvider value={schedule}>
       <AbsoluteFill style={{ fontFamily: FONT_STACK, background: "#000" }}>
         <Soundtrack track={track} duration={duration} />
-        {scenes.map(({ Comp, dur }, i) => {
-          const start = from;
-          from += dur;
-          return (
-            <Sequence key={i} from={start} durationInFrames={dur}>
-              <Comp data={data} />
-            </Sequence>
-          );
-        })}
+        <DesignCanvas>
+          {scenes.map(({ Comp, dur }, i) => {
+            const start = from;
+            from += dur;
+            return (
+              <Sequence key={i} from={start} durationInFrames={dur}>
+                <Comp data={data} />
+              </Sequence>
+            );
+          })}
+        </DesignCanvas>
       </AbsoluteFill>
     </ThemeProvider>
   );

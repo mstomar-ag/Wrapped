@@ -26,7 +26,8 @@ const getBundle = () => {
 //   v2 → v3: PeakHourScene fix (hardcoded "11 PM")
 //   v3 → v4: theme rotation (palette per scene now varies per render seed)
 //   v4 → v5: emoji rendering (fonts-noto-color-emoji added to Docker image)
-const RENDER_CACHE_VERSION = "v5";
+//   v5 → v6: DesignCanvas scales 1080-authored scenes for non-1080 outputs
+const RENDER_CACHE_VERSION = "v6";
 
 const hashData = (data: WrappedData): string =>
   crypto
@@ -49,6 +50,8 @@ export type RenderOptions = {
   displayName?: string;
   /** Skip cache and write exactly here. */
   outFile?: string;
+  /** Bypass the content-hash cache read (still writes the cache for future hits). */
+  forceFresh?: boolean;
 };
 
 const hashIndexPath = (hash: string) =>
@@ -78,9 +81,15 @@ export const renderWrapped = async (
   const cacheDir = renderCacheDir();
   const hash = hashData(data);
 
-  if (!opts.outFile) {
+  if (!opts.outFile && !opts.forceFresh) {
     const cached = await readHashIndex(hash);
-    if (cached) return cached;
+    if (cached) {
+      console.log(`[render] cache hit (hash=${hash}) → ${cached}`);
+      return cached;
+    }
+  }
+  if (opts.forceFresh) {
+    console.log(`[render] forceFresh — bypassing cache lookup`);
   }
 
   const browserExecutable = process.env.REMOTION_CHROME_EXECUTABLE_PATH || undefined;

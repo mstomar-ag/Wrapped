@@ -24,10 +24,12 @@ type MemberWrapOpts = {
   skipLLM?: boolean;
   /** "standard" (720×1280, default) or "high" (1080×1920, ~2× render time) */
   quality?: WrappedQuality;
+  /** When true, skip the render cache and force a fresh render. */
+  forceFresh?: boolean;
 };
 
 const runMemberWrapJob = async (entryId: string, opts: MemberWrapOpts): Promise<void> => {
-  const { member, win, post, skipLLM, quality } = opts;
+  const { member, win, post, skipLLM, quality, forceFresh } = opts;
 
   try {
     setWrapProgress(entryId, "collecting", 8, "Collecting Slack, GitHub, and more…");
@@ -44,7 +46,7 @@ const runMemberWrapJob = async (entryId: string, opts: MemberWrapOpts): Promise<
 
     setWrapProgress(entryId, "rendering", 42, "Rendering your reel (this takes ~1–2 min)…");
     const stopRenderTick = trackRenderProgress(entryId);
-    const file = await renderWrapped(data, { displayName: member.name });
+    const file = await renderWrapped(data, { displayName: member.name, forceFresh });
     stopRenderTick();
     const tEnd = Date.now();
     console.log(
@@ -125,6 +127,7 @@ type ChannelWrapOpts = {
   triggeredBy?: string;
   post?: { channelId: string; comment?: string } | null;
   quality?: WrappedQuality;
+  forceFresh?: boolean;
 };
 
 /** Non-blocking: returns a queued archive entry; work runs in the background. */
@@ -155,7 +158,7 @@ export const runWrapForChannel = async (opts: ChannelWrapOpts): Promise<ArchiveE
 };
 
 const runChannelWrapJob = async (entryId: string, opts: ChannelWrapOpts): Promise<void> => {
-  const { channel, win, post, quality } = opts;
+  const { channel, win, post, quality, forceFresh } = opts;
   try {
     setWrapProgress(entryId, "collecting", 5, `Resolving channel…`);
     const resolved = await resolveChannel(channel);
@@ -179,7 +182,7 @@ const runChannelWrapJob = async (entryId: string, opts: ChannelWrapOpts): Promis
     const data = buildChannelWrap(signals, win, quality);
     setWrapProgress(entryId, "rendering", 45, "Rendering channel reel…");
     const stopTick = trackRenderProgress(entryId);
-    const file = await renderWrapped(data, { displayName: `#${resolved.name}` });
+    const file = await renderWrapped(data, { displayName: `#${resolved.name}`, forceFresh });
     stopTick();
     console.log(`[wrap] rendered ${entryId} in ${Date.now() - t0}ms → ${file}`);
 

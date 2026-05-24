@@ -379,6 +379,12 @@ const slackHelpText = (): string => {
     "  • `/wrapped @user last-month hd`",
     "  • `/wrapped #wrapped-test last-week hd`",
     "",
+    "*Force a fresh render:* append `new` to skip the render cache.",
+    "Identical re-runs normally return the cached MP4 instantly. Use `new` when you",
+    "want a different theme variant, or to re-fetch live Slack/GitHub data.",
+    "  • `/wrapped @user last-week new`",
+    "  • `/wrapped @user last-week hd new`  ← combine flags freely",
+    "",
     `*Dashboard:* <${base}|${base}>`,
     "",
     "Estimated time:",
@@ -388,12 +394,22 @@ const slackHelpText = (): string => {
   ].join("\n");
 };
 
-/** Extract `hd` / `--high` / `--hd` from the token list (case-insensitive). */
-const extractQualityFlag = (tokens: string[]): { quality: "standard" | "high"; tokens: string[] } => {
+/** Extract Slack-only flags from the token list (case-insensitive). */
+const extractSlackFlags = (
+  tokens: string[],
+): {
+  quality: "standard" | "high";
+  forceFresh: boolean;
+  tokens: string[];
+} => {
   const HIGH_FLAGS = new Set(["hd", "--hd", "high", "--high"]);
-  const rest = tokens.filter((t) => !HIGH_FLAGS.has(t.toLowerCase()));
-  const isHigh = rest.length !== tokens.length;
-  return { quality: isHigh ? "high" : "standard", tokens: rest };
+  const NEW_FLAGS = new Set(["new", "--new", "fresh", "--fresh"]);
+  const lower = (t: string) => t.toLowerCase();
+  return {
+    quality: tokens.some((t) => HIGH_FLAGS.has(lower(t))) ? "high" : "standard",
+    forceFresh: tokens.some((t) => NEW_FLAGS.has(lower(t))),
+    tokens: tokens.filter((t) => !HIGH_FLAGS.has(lower(t)) && !NEW_FLAGS.has(lower(t))),
+  };
 };
 
 app.post("/api/slack/command", async (c) => {
@@ -412,8 +428,8 @@ app.post("/api/slack/command", async (c) => {
   const responseUrl = params.get("response_url") ?? "";
 
   const rawTokens = text.trim().split(/\s+/).filter(Boolean);
-  // Strip hd/--high anywhere in the command before the regular argument parsing
-  const { quality, tokens } = extractQualityFlag(rawTokens);
+  // Strip flags anywhere in the command before the regular argument parsing
+  const { quality, forceFresh, tokens } = extractSlackFlags(rawTokens);
 
   // /wrapped help
   if (tokens[0] === "help" || tokens.length === 0) {
@@ -476,6 +492,7 @@ app.post("/api/slack/command", async (c) => {
           triggeredBy: slackUserId,
           post: { channelId },
           quality,
+          forceFresh,
         });
         if (entry.status === "failed")
           await respondToSlashCommand(responseUrl, `Group wrap failed: ${entry.error}`);
@@ -519,6 +536,7 @@ app.post("/api/slack/command", async (c) => {
         triggeredBy: slackUserId,
         post: { channelId },
         quality,
+        forceFresh,
       });
       if (entry.status === "failed")
         await respondToSlashCommand(responseUrl, `Wrapped failed: ${entry.error}`);
