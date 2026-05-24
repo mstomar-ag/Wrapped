@@ -27,7 +27,8 @@ const getBundle = () => {
 //   v3 → v4: theme rotation (palette per scene now varies per render seed)
 //   v4 → v5: emoji rendering (fonts-noto-color-emoji added to Docker image)
 //   v5 → v6: DesignCanvas scales 1080-authored scenes for non-1080 outputs
-const RENDER_CACHE_VERSION = "v6";
+//   v6 → v7: -movflags +faststart so MP4s play before fully downloading
+const RENDER_CACHE_VERSION = "v7";
 
 const hashData = (data: WrappedData): string =>
   crypto
@@ -142,17 +143,26 @@ export const renderWrapped = async (
     browserExecutable,
     concurrency,
     ffmpegOverride: ({ args }) => {
-      // Drop any stray `-threads N` Remotion may have set, then inject our own.
+      // Drop any -threads / -movflags Remotion may have set, then inject ours.
       const stripped: string[] = [];
       for (let i = 0; i < args.length; i++) {
-        if (args[i] === "-threads") {
+        if (args[i] === "-threads" || args[i] === "-movflags") {
           i++; // skip value
           continue;
         }
         stripped.push(args[i]);
       }
-      // Inject before the output (which is the last positional arg).
-      return [...stripped.slice(0, -1), "-threads", String(encoderThreads), stripped[stripped.length - 1]];
+      // Inject our flags before the output (the last positional arg).
+      //   -threads N         cap libx264 thread count (host /proc/cpuinfo is wrong in containers)
+      //   -movflags +faststart   move the moov atom to the FRONT of the MP4
+      //                          so the browser can start playback while still downloading
+      //                          (otherwise: 9 MB MP4 → wait for full download → play)
+      return [
+        ...stripped.slice(0, -1),
+        "-threads", String(encoderThreads),
+        "-movflags", "+faststart",
+        stripped[stripped.length - 1],
+      ];
     },
   });
 
