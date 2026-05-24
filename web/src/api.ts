@@ -70,6 +70,7 @@ export const api = {
     from?: string;
     to?: string;
     since?: string;
+    quality?: "standard" | "high";
   }) =>
     fetch("/api/channels/wrap", {
       method: "POST",
@@ -100,7 +101,13 @@ export const api = {
       body: JSON.stringify(body),
     }).then((r) => json<{ label: string; from: string; to: string; preset: string | null }>(r)),
 
-  generate: (body: { member: string; from?: string; to?: string; window?: string }) =>
+  generate: (body: {
+    member: string;
+    from?: string;
+    to?: string;
+    window?: string;
+    quality?: "standard" | "high";
+  }) =>
     fetch("/api/wrapped/generate", {
       method: "POST",
       headers: { "content-type": "application/json" },

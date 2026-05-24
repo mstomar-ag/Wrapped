@@ -152,6 +152,43 @@ POST /api/slack/command
 
 ---
 
+## Render quality
+
+Every wrap renders at one of two resolutions. The picker lives on the **Generate** + **Channels** pages in the UI, and as an `hd` flag on the Slack slash command.
+
+| Quality | Resolution | Render time (8 vCPU GCP) | When to use |
+|---|---|---|---|
+| **Standard** (default) | 720 × 1280 | ~1 min | Everything. Slack, Instagram, TikTok all downscale to ~720p anyway. |
+| **High** | 1080 × 1920 | ~2 min | Desktop screenshots, archive-grade copies. |
+
+**Slack examples:**
+```
+/wrapped @user                    → last week, standard
+/wrapped @user last-month         → standard
+/wrapped @user last-month hd      → high quality
+/wrapped #wrapped-test hd         → channel wrap at HD
+```
+
+Aliases for HD: `hd`, `--hd`, `high`, `--high`. Anywhere in the command works.
+
+The choice is baked into the render-cache hash, so a standard wrap and an HD wrap with otherwise identical data each get cached separately.
+
+---
+
+## Redirector mode (legacy hosts)
+
+If you move the service to a new host (we moved from Railway → GCP), set `REDIRECT_TO=https://new-host` on the old deployment. Every request — except `/api/health` (kept cheap for platform probes) — gets a 302 to the same path/query on the new host. Slack signature verification + auth gate are bypassed because the request is forwarded before any of them runs. This way old bookmarks and slash-command URLs that point at the legacy domain keep working without re-distribution.
+
+Toggle:
+```
+# legacy deployment
+REDIRECT_TO=https://34-100-134-25.nip.io
+```
+
+Unset the var to flip the legacy host back into being a real app.
+
+---
+
 ## Trust model in one paragraph
 
 The Wrapped bot has **workspace-level** read access (a Slack bot token, a GitHub PAT, an X bearer). With these it can look up _any_ teammate's public activity. End users never see, provide, or grant tokens. LinkedIn and personal email genuinely need per-user OAuth (no app-only access exists) so they're treated as optional enrichments, not requirements.

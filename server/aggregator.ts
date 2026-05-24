@@ -43,6 +43,7 @@ export const buildWrappedData = (
   win: DateWindow,
   signals: AllSignals,
   overrides: CopyOverrides = {},
+  quality: import("../src/data").WrappedQuality = "standard",
 ): WrappedData => {
   const slack = signals.slack;
   const gh = signals.github;
@@ -57,6 +58,7 @@ export const buildWrappedData = (
 
   return {
     kind: "member",
+    quality,
     name: member.name,
     handle: `@${member.socials.slack?.handle ?? member.id}`,
     weekLabel: fmtWeekLabel(win),

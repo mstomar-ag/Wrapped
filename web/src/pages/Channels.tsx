@@ -8,6 +8,7 @@ export const Channels: React.FC = () => {
   const navigate = useNavigate();
   const [channel, setChannel] = useState<string>("");
   const [range, setRange] = useState<RangeValue>({ kind: "preset", window: "last-week" });
+  const [quality, setQuality] = useState<"standard" | "high">("standard");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [job, setJob] = useState<{ id: string; windowLabel?: string } | null>(null);
@@ -19,8 +20,8 @@ export const Channels: React.FC = () => {
     try {
       const body =
         range.kind === "custom"
-          ? { channel: channel.trim(), from: range.from, to: range.to }
-          : { channel: channel.trim(), window: range.window };
+          ? { channel: channel.trim(), from: range.from, to: range.to, quality }
+          : { channel: channel.trim(), window: range.window, quality };
       const res = await api.channelWrap(body);
       setJob({ id: res.id, windowLabel: (res as { windowLabel?: string }).windowLabel });
     } catch (e) {
@@ -72,6 +73,18 @@ export const Channels: React.FC = () => {
         <div>
           <label>Time range</label>
           <DateRangePicker value={range} onChange={setRange} />
+        </div>
+
+        <div>
+          <label>Quality</label>
+          <select
+            value={quality}
+            onChange={(e) => setQuality(e.target.value as "standard" | "high")}
+            style={{ width: "100%" }}
+          >
+            <option value="standard">Standard — 720×1280 (default, ~1 min)</option>
+            <option value="high">High — 1080×1920 (~2× render time)</option>
+          </select>
         </div>
 
         {error && <div style={{ color: "var(--accent)" }}>{error}</div>}

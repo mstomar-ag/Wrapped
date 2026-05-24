@@ -1,9 +1,19 @@
 /** Which kind of wrap this is — drives scene selection (channels skip commit slide etc.) */
 export type WrappedKind = "member" | "channel";
 
+/** Render quality. `standard` = 720×1280 (default, ~2× faster). `high` = 1080×1920. */
+export type WrappedQuality = "standard" | "high";
+
+export const QUALITY_DIMENSIONS: Record<WrappedQuality, { width: number; height: number }> = {
+  standard: { width: 720, height: 1280 },
+  high: { width: 1080, height: 1920 },
+};
+
 export type WrappedData = {
   /** Defaults to "member" if omitted (backward-compat). */
   kind?: WrappedKind;
+  /** Defaults to "standard" if omitted (backward-compat). */
+  quality?: WrappedQuality;
   name: string;
   handle: string;
   weekLabel: string;

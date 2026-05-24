@@ -113,7 +113,17 @@ export const renderWrapped = async (
     ? Math.max(1, Number(process.env.RENDER_CONCURRENCY))
     : Math.max(2, Math.min(6, detected - 1));
 
-  console.log(`[render] concurrency=${concurrency} (cores=${detected}) → ${outPath}`);
+  // libx264 reads /proc/cpuinfo which shows the *host* CPU count, not the
+  // container's cgroup quota. On Railway's 2 vCPU service that meant x264
+  // spawned 48 threads, OOM-killed ffmpeg, render died with EPIPE around
+  // frame 108. We cap it to the same value we use for browser concurrency.
+  // RENDER_FFMPEG_THREADS lets ops override independently if needed.
+  const encoderThreads = Number(process.env.RENDER_FFMPEG_THREADS) || concurrency;
+
+  console.log(
+    `[render] concurrency=${concurrency} (cores=${detected}) ffmpegThreads=${encoderThreads} → ${outPath}`,
+  );
+
   await renderMedia({
     composition,
     serveUrl,
@@ -122,6 +132,19 @@ export const renderWrapped = async (
     inputProps: { data },
     browserExecutable,
     concurrency,
+    ffmpegOverride: ({ args }) => {
+      // Drop any stray `-threads N` Remotion may have set, then inject our own.
+      const stripped: string[] = [];
+      for (let i = 0; i < args.length; i++) {
+        if (args[i] === "-threads") {
+          i++; // skip value
+          continue;
+        }
+        stripped.push(args[i]);
+      }
+      // Inject before the output (which is the last positional arg).
+      return [...stripped.slice(0, -1), "-threads", String(encoderThreads), stripped[stripped.length - 1]];
+    },
   });
 
   if (!opts.outFile) await writeHashIndex(hash, outPath);

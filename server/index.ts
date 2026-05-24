@@ -44,6 +44,39 @@ import {
 } from "./auth/google";
 import { DateWindow } from "./collectors/types";
 import { bootstrapDataIfNeeded } from "./bootstrap-data";
+import { listEntries as listEntriesForCleanup, setStatus as setEntryStatus } from "./archive/store";
+
+// EPIPE from a Chromium pipe (e.g. OOM killer terminating the browser
+// mid-render) is emitted as a stream `error` event, not a rejected promise,
+// so the existing try/catch around renderWrapped misses it. Without this
+// handler Node exits, the server dies, and the in-flight wrap stays stuck
+// at `rendering` forever. We mark any in-flight entry as failed instead.
+const handleFatalAsync = (label: string, err: unknown) => {
+  const msg = err instanceof Error ? err.message : String(err);
+  const stack = err instanceof Error ? err.stack : undefined;
+  console.error(`[fatal] ${label}: ${msg}`);
+  if (stack) console.error(stack);
+
+  // Look like an OOM-induced pipe break? Tell the user what happened.
+  const looksLikeOOM = /EPIPE|broken pipe|ECONNRESET|chrome|chromium/i.test(msg);
+  const reason = looksLikeOOM
+    ? `Render worker died mid-render — likely OOM. Reduce RENDER_CONCURRENCY or bump memory. (raw: ${msg})`
+    : `Worker crashed: ${msg}`;
+
+  // Mark anything in `rendering`/`queued` as failed so the UI stops polling.
+  try {
+    for (const e of listEntriesForCleanup()) {
+      if (e.status === "queued" || e.status === "rendering") {
+        setEntryStatus(e.id, "failed", { error: reason });
+        console.error(`[fatal] marked ${e.id} as failed`);
+      }
+    }
+  } catch (e2) {
+    console.error("[fatal] failed to update archive entries:", (e2 as Error).message);
+  }
+};
+process.on("uncaughtException", (err) => handleFatalAsync("uncaughtException", err));
+process.on("unhandledRejection", (reason) => handleFatalAsync("unhandledRejection", reason));
 
 const app = new Hono();
 
@@ -51,6 +84,26 @@ app.use(
   "*",
   logger((line) => console.log(`[${new Date().toISOString()}] ${line}`)),
 );
+
+// ─── Redirector mode ────────────────────────────────────────────────────────
+// Set REDIRECT_TO=https://prod-host on a deployment to make it forward every
+// request to that host (preserving path + query). Used to keep an old domain
+// (e.g. a previous Railway URL) live for users with stale bookmarks/links
+// without running the full app there. MUST run before requireSignIn so users
+// without sessions still get redirected instead of a 401.
+const REDIRECT_TO = process.env.REDIRECT_TO?.trim().replace(/\/+$/, "");
+if (REDIRECT_TO) {
+  console.log(`[boot] REDIRECT_TO mode → forwarding all requests to ${REDIRECT_TO}`);
+  app.use("*", async (c, next) => {
+    const u = new URL(c.req.url);
+    // Health check stays cheap so platform probes don't 302
+    if (u.pathname === "/api/health" || u.pathname === "/health") {
+      return c.json({ ok: true, redirector: REDIRECT_TO });
+    }
+    return c.redirect(`${REDIRECT_TO}${u.pathname}${u.search}`, 302);
+  });
+}
+
 app.use("*", requireSignIn);
 
 // ─── Public ──────────────────────────────────────────────────────────────────
@@ -190,6 +243,7 @@ app.post("/api/wrapped/generate", async (c) => {
     from?: string;
     to?: string;
     since?: string;
+    quality?: "standard" | "high";
   };
   const member = findMember(body.member);
   if (!member) return c.json({ error: "unknown member" }, 404);
@@ -215,6 +269,7 @@ app.post("/api/wrapped/generate", async (c) => {
     source: "ui",
     triggeredBy: session?.email,
     post: null,
+    quality: body.quality === "high" ? "high" : "standard",
   });
   return c.json({ id: entry.id, windowLabel: entry.windowLabel });
 });
@@ -227,6 +282,7 @@ app.post("/api/channels/wrap", async (c) => {
     from?: string;
     to?: string;
     since?: string;
+    quality?: "standard" | "high";
   };
   if (!body.channel) return c.json({ error: "channel (name or ID) is required" }, 400);
 
@@ -246,6 +302,7 @@ app.post("/api/channels/wrap", async (c) => {
     source: "ui",
     triggeredBy: session?.email,
     post: null, // UI never auto-posts to Slack
+    quality: body.quality === "high" ? "high" : "standard",
   });
   return c.json({ id: entry.id, windowLabel: entry.windowLabel });
 });
@@ -318,6 +375,10 @@ const slackHelpText = (): string => {
     "• `/wrapped dashboard` — link to the web dashboard",
     "• `/wrapped help` — show this message",
     "",
+    "*Quality:* append `hd` to render at 1080×1920 (default is 720×1280, ~2× faster).",
+    "  • `/wrapped @user last-month hd`",
+    "  • `/wrapped #wrapped-test last-week hd`",
+    "",
     `*Dashboard:* <${base}|${base}>`,
     "",
     "Estimated time:",
@@ -325,6 +386,14 @@ const slackHelpText = (): string => {
     "",
     "Every reel is also saved to the centralized archive (visible in the dashboard).",
   ].join("\n");
+};
+
+/** Extract `hd` / `--high` / `--hd` from the token list (case-insensitive). */
+const extractQualityFlag = (tokens: string[]): { quality: "standard" | "high"; tokens: string[] } => {
+  const HIGH_FLAGS = new Set(["hd", "--hd", "high", "--high"]);
+  const rest = tokens.filter((t) => !HIGH_FLAGS.has(t.toLowerCase()));
+  const isHigh = rest.length !== tokens.length;
+  return { quality: isHigh ? "high" : "standard", tokens: rest };
 };
 
 app.post("/api/slack/command", async (c) => {
@@ -342,7 +411,9 @@ app.post("/api/slack/command", async (c) => {
   const slackUserId = params.get("user_id") ?? "";
   const responseUrl = params.get("response_url") ?? "";
 
-  const tokens = text.trim().split(/\s+/).filter(Boolean);
+  const rawTokens = text.trim().split(/\s+/).filter(Boolean);
+  // Strip hd/--high anywhere in the command before the regular argument parsing
+  const { quality, tokens } = extractQualityFlag(rawTokens);
 
   // /wrapped help
   if (tokens[0] === "help" || tokens.length === 0) {
@@ -404,6 +475,7 @@ app.post("/api/slack/command", async (c) => {
           source: "slack",
           triggeredBy: slackUserId,
           post: { channelId },
+          quality,
         });
         if (entry.status === "failed")
           await respondToSlashCommand(responseUrl, `Group wrap failed: ${entry.error}`);
@@ -446,6 +518,7 @@ app.post("/api/slack/command", async (c) => {
         source: "slack",
         triggeredBy: slackUserId,
         post: { channelId },
+        quality,
       });
       if (entry.status === "failed")
         await respondToSlashCommand(responseUrl, `Wrapped failed: ${entry.error}`);

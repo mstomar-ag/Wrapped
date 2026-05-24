@@ -59,6 +59,18 @@ npm run test:watch        TDD loop
 
 ## Gotchas and landmines
 
+### Quality toggle (720p default, 1080p opt-in)
+
+`WrappedData.quality` is `"standard" | "high"`. Renderer picks dimensions from `QUALITY_DIMENSIONS` in `src/data.ts` via `calculateMetadata` in `Root.tsx`. If you add new render code paths, make sure `quality` flows from the request → `runWrapForMember`/`runWrapForChannel` → `buildWrappedData` / `buildChannelWrap` → `data.quality`. The cache hash includes quality, so standard and HD never collide.
+
+### Redirector mode
+
+Set `REDIRECT_TO=https://new-host` and the server forwards every request (except `/api/health`) to that host. This is registered as the first `app.use("*")` middleware so it runs before auth — unauthenticated users get redirected instead of a 401. Used for the Railway → GCP move.
+
+### Docker `--env-file` is read only at container creation
+
+`docker restart` does NOT re-read `--env-file`. After editing `.env`, you MUST `docker rm -f wrpd && docker run …` to pick up changes. Has bitten us multiple times; if `PUBLIC_BASE_URL` looks stale in OAuth redirects, that's almost always why.
+
 ### `"type": "module"` is required
 
 Top-level `await` in `server/cli.ts` and ESM imports throughout demand this. Don't switch to CommonJS without rewriting the CLIs.

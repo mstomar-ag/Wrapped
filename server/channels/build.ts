@@ -21,10 +21,15 @@ const fmtHour = (h: number) => {
   return `${hh} ${am ? "AM" : "PM"}`;
 };
 
-export const buildChannelWrap = (signals: ChannelSignals, win: DateWindow): WrappedData => {
+export const buildChannelWrap = (
+  signals: ChannelSignals,
+  win: DateWindow,
+  quality: import("../../src/data").WrappedQuality = "standard",
+): WrappedData => {
   const hasPeak = signals.peakHour.count > 0;
   return {
     kind: "channel",
+    quality,
     name: `#${signals.channelName}`,
     handle: `#${signals.channelName}`,
     weekLabel: labelWindow(win),

@@ -13,6 +13,8 @@ import { ArchiveEntry, ArchiveSource } from "./archive/types";
 import { postVideoToChannel } from "./slack/post";
 import { setWrapProgress, trackRenderProgress } from "./wrap-progress";
 
+import type { WrappedQuality } from "../src/data";
+
 type MemberWrapOpts = {
   member: Member;
   win: DateWindow;
@@ -20,10 +22,12 @@ type MemberWrapOpts = {
   triggeredBy?: string;
   post?: { channelId: string; comment?: string } | null;
   skipLLM?: boolean;
+  /** "standard" (720×1280, default) or "high" (1080×1920, ~2× render time) */
+  quality?: WrappedQuality;
 };
 
 const runMemberWrapJob = async (entryId: string, opts: MemberWrapOpts): Promise<void> => {
-  const { member, win, post, skipLLM } = opts;
+  const { member, win, post, skipLLM, quality } = opts;
 
   try {
     setWrapProgress(entryId, "collecting", 8, "Collecting Slack, GitHub, and more…");
@@ -36,7 +40,7 @@ const runMemberWrapJob = async (entryId: string, opts: MemberWrapOpts): Promise<
     const tCopy = Date.now();
 
     setWrapProgress(entryId, "aggregating", 38, "Building your stats…");
-    const data = buildWrappedData(member, win, signals, copy);
+    const data = buildWrappedData(member, win, signals, copy, quality);
 
     setWrapProgress(entryId, "rendering", 42, "Rendering your reel (this takes ~1–2 min)…");
     const stopRenderTick = trackRenderProgress(entryId);
@@ -120,6 +124,7 @@ type ChannelWrapOpts = {
   source: ArchiveSource;
   triggeredBy?: string;
   post?: { channelId: string; comment?: string } | null;
+  quality?: WrappedQuality;
 };
 
 /** Non-blocking: returns a queued archive entry; work runs in the background. */
@@ -150,7 +155,7 @@ export const runWrapForChannel = async (opts: ChannelWrapOpts): Promise<ArchiveE
 };
 
 const runChannelWrapJob = async (entryId: string, opts: ChannelWrapOpts): Promise<void> => {
-  const { channel, win, post } = opts;
+  const { channel, win, post, quality } = opts;
   try {
     setWrapProgress(entryId, "collecting", 5, `Resolving channel…`);
     const resolved = await resolveChannel(channel);
@@ -171,7 +176,7 @@ const runChannelWrapJob = async (entryId: string, opts: ChannelWrapOpts): Promis
     const signals = await collectChannel(resolved.id, win);
     if (!signals) throw new Error("Slack collector returned null (missing SLACK_BOT_TOKEN?)");
     setWrapProgress(entryId, "aggregating", 35, "Summarizing the channel…");
-    const data = buildChannelWrap(signals, win);
+    const data = buildChannelWrap(signals, win, quality);
     setWrapProgress(entryId, "rendering", 45, "Rendering channel reel…");
     const stopTick = trackRenderProgress(entryId);
     const file = await renderWrapped(data, { displayName: `#${resolved.name}` });
