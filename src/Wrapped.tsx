@@ -1,7 +1,7 @@
 import React from "react";
 import { AbsoluteFill, Sequence, Audio, staticFile, useCurrentFrame, interpolate, useVideoConfig } from "remotion";
 import { loadFont } from "@remotion/google-fonts/Inter";
-import { WrappedData, DUMMY, QUALITY_DIMENSIONS } from "./data";
+import { WrappedData, DUMMY, QUALITY_DIMENSIONS, hasCodeActivity, hasThreadActivity } from "./data";
 import { pickTrack } from "./music";
 import { ThemeProvider, pickSchedule } from "./themeRotation";
 import { IntroScene } from "./scenes/IntroScene";
@@ -22,10 +22,13 @@ type SceneDef = { Comp: React.FC<{ data: WrappedData }>; dur: number };
 
 // Scene selection depends on data:
 //   - channel wraps never include CommitScene (no GitHub data)
-//   - EmojiScene is dropped if there are zero emojis/reactions to feature
+//   - member wraps skip CommitScene when there was no real code activity
+//   - EmojiScene / ThreadScene drop when there is nothing to feature
 export const buildScenes = (data: WrappedData): SceneDef[] => {
   const isChannel = data.kind === "channel";
   const hasEmoji = !!data.topEmoji && data.topEmoji.count > 0;
+  const showCommit = !isChannel && hasCodeActivity(data);
+  const showThread = hasThreadActivity(data);
 
   const scenes: SceneDef[] = [
     { Comp: IntroScene, dur: 60 },
@@ -33,8 +36,8 @@ export const buildScenes = (data: WrappedData): SceneDef[] => {
     { Comp: PeakHourScene, dur: 75 },
   ];
   if (hasEmoji) scenes.push({ Comp: EmojiScene, dur: 75 });
-  scenes.push({ Comp: ThreadScene, dur: 90 });
-  if (!isChannel) scenes.push({ Comp: CommitScene, dur: 105 });
+  if (showThread) scenes.push({ Comp: ThreadScene, dur: 90 });
+  if (showCommit) scenes.push({ Comp: CommitScene, dur: 105 });
   scenes.push({ Comp: VibeScene, dur: 90 });
   scenes.push({ Comp: WrapScene, dur: 75 });
   return scenes;

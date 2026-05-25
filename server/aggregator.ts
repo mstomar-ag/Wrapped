@@ -5,8 +5,7 @@ import { collectGitHub } from "./collectors/github";
 import { collectX } from "./collectors/x";
 import { collectLinkedIn } from "./collectors/linkedin";
 import { collectEmail } from "./collectors/email";
-import { WrappedData } from "../src/data";
-import { DUMMY } from "../src/data";
+import { WrappedData, DUMMY, EMPTY_COMMIT } from "../src/data";
 import { CopyOverrides } from "./copy";
 import { formatShortDate } from "./timezone";
 
@@ -47,10 +46,13 @@ export const buildWrappedData = (
 ): WrappedData => {
   const slack = signals.slack;
   const gh = signals.github;
+  // Demo filler only when every collector failed (preview / misconfigured deploy).
+  const useDemo = slack === null && gh === null;
 
-  const messages = slack?.messageCount ?? DUMMY.numbers.messages;
-  const commits = gh?.commitCount ?? DUMMY.numbers.commits;
-  const linesChanged = (gh?.additions ?? 0) + (gh?.deletions ?? 0) || DUMMY.numbers.linesChanged;
+  const messages = slack?.messageCount ?? (useDemo ? DUMMY.numbers.messages : 0);
+  const commits = gh?.commitCount ?? (useDemo ? DUMMY.numbers.commits : 0);
+  const linesChanged =
+    gh !== null ? gh.additions + gh.deletions : useDemo ? DUMMY.numbers.linesChanged : 0;
 
   // If there's no Slack activity to summarize, show a clear "—" rather than
   // landing on midnight or leaking the dummy "11 PM".
@@ -84,7 +86,9 @@ export const buildWrappedData = (
           replies: slack.longestThread.replies,
           title: slack.longestThread.title,
         }
-      : DUMMY.thread,
+      : slack
+        ? { channel: "—", replies: 0, title: "No epic threads this week" }
+        : DUMMY.thread,
     commit: gh?.topCommit
       ? {
           repo: gh.topCommit.repo,
@@ -93,10 +97,14 @@ export const buildWrappedData = (
           additions: gh.topCommit.additions,
           deletions: gh.topCommit.deletions,
         }
-      : DUMMY.commit,
+      : useDemo
+        ? DUMMY.commit
+        : EMPTY_COMMIT,
     ghostMode: slack
       ? { streaks: slack.ghostStreaks.count, longestHours: slack.ghostStreaks.longestHours }
-      : DUMMY.ghostMode,
+      : useDemo
+        ? DUMMY.ghostMode
+        : { streaks: 0, longestHours: 0 },
   };
 };
 

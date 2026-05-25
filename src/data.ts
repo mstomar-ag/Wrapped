@@ -51,6 +51,20 @@ export type WrappedData = {
   };
 };
 
+/** Placeholder when collectors ran but there was no code activity — never show on slides. */
+export const EMPTY_COMMIT: WrappedData["commit"] = {
+  repo: "",
+  sha: "",
+  summary: "",
+  additions: 0,
+  deletions: 0,
+};
+
+export const hasCodeActivity = (data: WrappedData): boolean =>
+  data.numbers.commits > 0 && data.commit.repo.length > 0;
+
+export const hasThreadActivity = (data: WrappedData): boolean => data.thread.replies > 0;
+
 export const DUMMY: WrappedData = {
   name: "Mayank",
   handle: "@mayank",

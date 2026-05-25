@@ -48,4 +48,30 @@ describe("buildWrappedData", () => {
     expect(data.numbers.commits).toBe(12);
     expect(data.commit.repo).toBe("x/y");
   });
+
+  it("uses zeros and empty commit for slack-only leaders, not demo filler", () => {
+    const data = buildWrappedData(member, win, {
+      ...emptySignals,
+      slack: {
+        messageCount: 420,
+        reactionsGiven: 10,
+        topEmoji: { emoji: ":rocket:", count: 5 },
+        peakHour: { hour: 14, messageCount: 22 },
+        longestThread: { channel: "#general", title: "Q3 planning", replies: 18 },
+        ghostStreaks: { count: 2, longestHours: 4 },
+        sampleMessages: [],
+      },
+      github: {
+        commitCount: 0,
+        additions: 0,
+        deletions: 0,
+        topCommit: null,
+      },
+    });
+    expect(data.numbers.commits).toBe(0);
+    expect(data.numbers.linesChanged).toBe(0);
+    expect(data.numbers.messages).toBe(420);
+    expect(data.commit.repo).toBe("");
+    expect(data.thread.replies).toBe(18);
+  });
 });
